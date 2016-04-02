@@ -5,7 +5,7 @@ public class Vector {
 	double y_cor;
 	double z_cor;
 	
-	public Vector(int x, int y, int z)
+	public Vector(double x, double y, double z)
 	{
 		this.x_cor = x;
 		this.y_cor = y;
