@@ -75,7 +75,7 @@ public class RayTracer {
 		int lineNum = 0;
 		System.out.println("Started parsing scene file " + sceneFileName);
 
-
+		List<Surface> surfaces_list = new ArrayList<Surface>();
 
 		while ((line = r.readLine()) != null)
 		{
@@ -112,13 +112,11 @@ public class RayTracer {
 				}
 				else if (code.equals("sph"))
 				{
-                                        // Add code here to parse sphere parameters
+                    // Add code here to parse sphere parameters
 
-                                        // Example (you can implement this in many different ways!):
-					                    // Sphere sphere = new Sphere();
-                                        // sphere.setCenter(params[0], params[1], params[2]);
-                                        // sphere.setRadius(params[3]);
-                                        // sphere.setMaterial(params[4]);
+					Sphere sph = new Sphere(Double.parseDouble(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]),
+							Double.parseDouble(params[3]), Integer.parseInt(params[4]));
+					surfaces_list.add(sph);
 
 					System.out.println(String.format("Parsed sphere (line %d)", lineNum));
 				}

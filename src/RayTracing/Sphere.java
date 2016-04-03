@@ -3,11 +3,13 @@ package RayTracing;
 public class Sphere implements Surface{
 	public Vector Center;
 	public double radius;
+	public int material_index;
 	
-	public Sphere(double x, double y, double z, double radius)
+	public Sphere(double x, double y, double z, double radius, int material_index)
 	{
 		this.Center = new Vector(x, y, z);
 		this.radius = radius;
+		this.material_index = material_index;
 	}
 	
 	/*  implemented as explained in presentation */
