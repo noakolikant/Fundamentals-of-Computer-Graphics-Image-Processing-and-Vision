@@ -15,6 +15,13 @@ public class Sphere implements Surface{
 	/*  implemented as explained in presentation */
 	public Vector get_intersection_point_with_surface(Vector v)
 	{
+		// I think that this is correct only if the ray starts from the origin
+		// otherwise, v should be a Ray class (start point and a direction)
+		// and all the calculations should take it another consideration.
+		// Another solution is to move everything to be like the start point of
+		// the ray is the origin, and in this case it means to start the function
+		// with this.Center.neg(start) and add the function with this.Center.add(start).
+		// What do you think ?
 		double t_ca = v.dot(this.Center);
 		if (0 > t_ca)
 		{
