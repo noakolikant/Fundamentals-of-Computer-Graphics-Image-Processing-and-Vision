@@ -20,7 +20,7 @@ public class Camera {
 		Vector temp = new Vector(this.direction); // copy this vector
 		temp.multiplyByScalar(temp.dot(up_vector));
 		this.up_vector.substract(temp);
-		assert this.up_vector.dot(this.direction) == 0;
+		// assert this.up_vector.dot(this.direction) == 0;
 		this.screen_distance = screen_distnace;
 		this.screen_width = screen_width;
 	}
