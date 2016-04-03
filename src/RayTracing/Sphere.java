@@ -22,6 +22,8 @@ public class Sphere implements Surface{
 		// the ray is the origin, and in this case it means to start the function
 		// with this.Center.neg(start) and add the function with this.Center.add(start).
 		// What do you think ?
+		// Moreover - I think we should verify that the direction vector is 
+		// normalized: assert v.length() == 1;
 		double t_ca = v.dot(this.Center);
 		if (0 > t_ca)
 		{
