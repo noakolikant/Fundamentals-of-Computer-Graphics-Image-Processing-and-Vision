@@ -5,3 +5,5 @@
 /Vector.class
 /LightSource.class
 /Camera.class
+/Sphere.class
+/Ray.class
