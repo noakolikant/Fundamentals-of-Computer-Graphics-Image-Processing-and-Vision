@@ -112,9 +112,8 @@ public class RayTracer {
 				}
 				else if (code.equals("sph"))
 				{
-                    // Add code here to parse sphere parameters
-
-					Sphere sph = new Sphere(Double.parseDouble(params[0]), Double.parseDouble(params[1]), Double.parseDouble(params[2]),
+					Sphere sph = new Sphere(Double.parseDouble(params[0]), 
+							Double.parseDouble(params[1]), Double.parseDouble(params[2]),
 							Double.parseDouble(params[3]), Integer.parseInt(params[4]));
 					surfaces_list.add(sph);
 
@@ -122,8 +121,10 @@ public class RayTracer {
 				}
 				else if (code.equals("pln"))
 				{
-                                        // Add code here to parse plane parameters
-
+					Plane plane = new Plane(new Vector(Double.parseDouble(params[0]),
+							Double.parseDouble(params[1]), Double.parseDouble(params[2])),
+							Double.parseDouble(params[3]), Integer.parseInt(params[4]));
+					surfaces_list.add(plane);
 					System.out.println(String.format("Parsed plane (line %d)", lineNum));
 				}
 				else if (code.equals("cyl"))

@@ -43,5 +43,14 @@ public class Sphere implements Surface{
 		intersection_point.multiplyByScalar(t);
 		return intersection_point;
 	}
+	
+	public Vector get_intersection_point_with_surface(Ray r) {
+		// If my comment up is correct, we can change the upper function to private
+		// and remove the upper function from Surface.java
+		this.Center.substract(r.start);
+		Vector intersection_point = this.get_intersection_point_with_surface(r.direction);
+		this.Center.add(r.start);
+		return intersection_point;
+	}
 
 }
