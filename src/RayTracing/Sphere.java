@@ -13,44 +13,29 @@ public class Sphere implements Surface{
 	}
 	
 	/*  implemented as explained in presentation */
-	public Vector get_intersection_point_with_surface(Vector v)
+	public Vector get_intersection_point_with_surface(Ray r)
 	{
-		// I think that this is correct only if the ray starts from the origin
-		// otherwise, v should be a Ray class (start point and a direction)
-		// and all the calculations should take it another consideration.
-		// Another solution is to move everything to be like the start point of
-		// the ray is the origin, and in this case it means to start the function
-		// with this.Center.neg(start) and add the function with this.Center.add(start).
-		// What do you think ?
-		// Moreover - I think we should verify that the direction vector is 
-		// normalized: assert v.length() == 1;
-		double t_ca = v.dot(this.Center);
+		Vector L_vector = new Vector(this.Center);
+		L_vector.substract(r.start); // L = O - P0
+		double t_ca = r.direction.dot(L_vector); //t_ca = dot(L, V)
 		if (0 > t_ca)
 		{
 			return null;
 		}
 		
-		double d_squared = this.Center.dot(this.Center) - Math.pow(t_ca, 2);
+		double d_squared = L_vector.dot(L_vector) - Math.pow(t_ca, 2); // d^2 = dot(L, L) - t_ca^2
 		if(d_squared > Math.pow(this.radius, 2))
 		{
 			return null;
 		}
 		
-		double t_hc = Math.sqrt(Math.pow(this.radius, 2) - d_squared);
+		double t_hc = Math.sqrt(Math.pow(this.radius, 2) - d_squared); // (r^2 - d^2)^0.5
 		double t = t_ca - t_hc;
 		
-		Vector intersection_point = new Vector(v);
+		// P = P0 + tV
+		Vector intersection_point = new Vector(r.direction);
 		intersection_point.multiplyByScalar(t);
+		intersection_point.add(r.start);
 		return intersection_point;
 	}
-	
-	public Vector get_intersection_point_with_surface(Ray r) {
-		// If my comment up is correct, we can change the upper function to private
-		// and remove the upper function from Surface.java
-		this.Center.substract(r.start);
-		Vector intersection_point = this.get_intersection_point_with_surface(r.direction);
-		this.Center.add(r.start);
-		return intersection_point;
-	}
-
 }

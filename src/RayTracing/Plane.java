@@ -14,13 +14,6 @@ public class Plane implements Surface {
 		this.material_index = material_index;
 	}
 	
-	
-	@Override
-	public Vector get_intersection_point_with_surface(Vector v) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
 	public Vector get_intersection_point_with_surface(Ray r) {
 		double t = - ((r.start.dot((this.normal)) + this.offset)) /
 				(r.direction.dot(this.normal));
