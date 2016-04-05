@@ -62,6 +62,16 @@ public class Vector {
 	}
 	
 	/**
+	 * Returns the destination to point p
+	 * @return destination to point p
+	 */
+	public double destinstion_from_point(Vector p) {
+		Vector delta = new Vector(p);
+		delta.substract(this);
+		return delta.length();
+	}
+	
+	/**
 	 * Normalize this vector
 	 */
 	public void normalize() {
