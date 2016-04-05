@@ -15,6 +15,10 @@ public class Plane implements Surface {
 	}
 	
 	public Vector get_intersection_point_with_surface(Ray r) {
+		if (r.direction.dot(this.normal) == 0) {
+			// The ray and the plane are parallel
+			return null;
+		}
 		double t = - ((r.start.dot((this.normal)) + this.offset)) /
 				(r.direction.dot(this.normal));
 		if (t < 0) {
