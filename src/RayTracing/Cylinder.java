@@ -9,11 +9,13 @@ public class Cylinder implements Surface {
 	public Vector top_disk_center;
 	public Vector pivot;
 	public double radius;
+	public int material_index;
 	
 	public Cylinder (double x, double y, double z, double length, double radius, double x_rotation,
-			double y_rotation, double z_rotation)
+			double y_rotation, double z_rotation, int material_index)
 	{
 		this.radius = radius;
+		this.material_index = material_index;
 		
 		// Determining Cylinder pivot direction
 		this.pivot = new Vector(0, 0, 1);

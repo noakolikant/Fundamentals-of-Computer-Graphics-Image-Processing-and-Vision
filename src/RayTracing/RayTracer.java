@@ -129,8 +129,14 @@ public class RayTracer {
 				}
 				else if (code.equals("cyl"))
 				{
-                                        // Add code here to parse cylinder parameters
-
+					Cylinder cylinder = new Cylinder(Double.parseDouble(params[0]),
+							Double.parseDouble(params[1]), Double.parseDouble(params[2]),
+							Double.parseDouble(params[3]), Double.parseDouble(params[4]),
+							Double.parseDouble(params[5]), Double.parseDouble(params[6]),
+							Double.parseDouble(params[7]), Integer.parseInt(params[8])
+							);
+					surfaces_list.add(cylinder);
+							
 					System.out.println(String.format("Parsed cylinder (line %d)", lineNum));
 				}
 				else if (code.equals("lgt"))
