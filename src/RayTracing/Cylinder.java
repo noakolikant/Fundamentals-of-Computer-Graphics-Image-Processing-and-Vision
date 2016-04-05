@@ -7,6 +7,8 @@ public class Cylinder implements Surface {
 	 */
 	public Vector bottom_disk_center;
 	public Vector top_disk_center;
+	public Vector Center;
+	public double length;
 	public Vector pivot;
 	public double radius;
 	public int material_index;
@@ -24,6 +26,8 @@ public class Cylinder implements Surface {
 		this.pivot.rotate_vector('z', z_rotation);
 		
 		Vector Center = new Vector(x, y, z);
+		this.Center = Center;
+		this.length = length;
 
 		// Determining top and bottom disks' centers
 		Vector vector_delta = new Vector(this.pivot);
@@ -129,8 +133,44 @@ public class Cylinder implements Surface {
 		 potential_intersection_point2.multiplyByScalar(t2);
 		 potential_intersection_point2.add(r.start);
 		 
-		 double first_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
-		 double second_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
+		 double first_point_dest = 0, second_point_dest = 0;
+		 Vector is_inside_cylinder = new Vector(potential_intersection_point1);
+		 is_inside_cylinder.substract(this.Center);
+		 if(Math.pow(Math.pow(is_inside_cylinder.length(), 2) - Math.pow(this.radius, 2), 0.5)
+				 > this.length / 2)
+		 {
+			 potential_intersection_point1 = null;
+		 }
+		 else
+		 {
+			 first_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
+		 }
+		 
+		 is_inside_cylinder = new Vector(potential_intersection_point2);
+		 is_inside_cylinder.substract(this.Center);
+		 if(Math.pow(Math.pow(is_inside_cylinder.length(), 2) - Math.pow(this.radius, 2), 0.5)
+				 > this.length / 2)
+		 {
+			 potential_intersection_point2 = null;
+		 }
+		 else
+		 {
+			 second_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
+		 }
+		 
+		 if((potential_intersection_point2 == null) && (potential_intersection_point1 == null))
+		 {
+			return null; 
+		 }
+		 if(potential_intersection_point1 == null)
+		 {
+			 first_point_dest = second_point_dest + 1; // make it bigger
+		 }
+		 else if(potential_intersection_point2 == null)
+		 {
+			 second_point_dest = first_point_dest + 1; // make is bigger
+		 }
+
 
 		 if(first_point_dest < second_point_dest)
 		 {
