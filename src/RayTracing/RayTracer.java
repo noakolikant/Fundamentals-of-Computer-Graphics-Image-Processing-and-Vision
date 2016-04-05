@@ -76,7 +76,8 @@ public class RayTracer {
 		System.out.println("Started parsing scene file " + sceneFileName);
 
 		List<Surface> surfaces_list = new ArrayList<Surface>();
-
+		List<Material> materials_list = new ArrayList<Material>();
+		
 		while ((line = r.readLine()) != null)
 		{
 			line = line.trim();
@@ -106,7 +107,17 @@ public class RayTracer {
 				}
 				else if (code.equals("mtl"))
 				{
-                                        // Add code here to parse material parameters
+					ColorAttribute diffusive_color = new ColorAttribute(Double.parseDouble(params[0]), 
+							Double.parseDouble(params[1]), Double.parseDouble(params[2]));
+					ColorAttribute Specular_color = new ColorAttribute(Double.parseDouble(params[3]), 
+							Double.parseDouble(params[4]), Double.parseDouble(params[5]));
+					ColorAttribute Reflection_color = new ColorAttribute(Double.parseDouble(params[7]), 
+							Double.parseDouble(params[8]), Double.parseDouble(params[9]));
+					
+					Material material = new Material(diffusive_color, Specular_color, Double.parseDouble(params[6]),
+							Reflection_color, Double.parseDouble(params[10]));
+					
+					materials_list.add(material);
 
 					System.out.println(String.format("Parsed material (line %d)", lineNum));
 				}
