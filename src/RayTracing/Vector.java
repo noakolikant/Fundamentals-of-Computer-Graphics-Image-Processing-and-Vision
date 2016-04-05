@@ -119,4 +119,39 @@ public class Vector {
 		this.y_cor *= other.y_cor;
 		this.z_cor *= other.z_cor;
 	}
+	
+	/**
+	 * Sets Vector after multiplying with a Matrix. M * v
+	 * @param M - Matrix to multipy from the left
+	 */
+	public void multiply_with_Matrix(Matrix M)
+	{
+		double tmp_calc;
+		
+		for(int i = 0; i < 3; i ++)
+		{
+			tmp_calc = M.data[i][0] * this.x_cor + M.data[i][1] * this.y_cor + M.data[i][2] * this.z_cor + M.data[i][3] * 1;
+			switch (i)
+			{
+			case 0:
+				this.x_cor = tmp_calc;
+				break;
+			case 1:
+				this.y_cor = tmp_calc;
+				break;
+			case 2:
+				this.z_cor = tmp_calc;
+				break;
+			}
+		}
+	}
+	/**
+	 * Sets self new Vector after rotation
+	 * @param axis - can be 'x', 'y' or 'z'
+	 * @param degree - angle in degree to rotate
+	 */
+	public void rotate_vector(char axis, double degree) {
+		Matrix rotatiom_mat = new Matrix(axis, degree);
+		this.multiply_with_Matrix(rotatiom_mat);
+	}
 }
