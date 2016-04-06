@@ -33,9 +33,17 @@ public class Plane implements Surface {
 	}
 
 	@Override
-	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray) 
+	{
+		Vector normal = new Vector(this.normal);
+		normal.normalize();
 
+		Vector reflection_direction = new Vector(normal);
+		reflection_direction.multiplyByScalar(2 * normal.dot(incomming_ray.direction));
+		reflection_direction.add(incomming_ray.direction);
+		//R = 2 * dot(normal, incomming_ray_vector) + incomming_ray_vector
+		Ray reflection = new Ray(intersection_point, reflection_direction);
+
+		return reflection;
+	}
 }
