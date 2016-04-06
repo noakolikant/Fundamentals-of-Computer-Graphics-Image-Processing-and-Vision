@@ -15,5 +15,5 @@ public interface Surface {
 	 * @param Ray incomming_ray - incoming Ray representation
 	 * @return the mirror outgoing ray
 	 */
-	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray);
+	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray);
 }

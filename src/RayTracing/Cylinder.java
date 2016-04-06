@@ -171,7 +171,6 @@ public class Cylinder implements Surface {
 			 second_point_dest = first_point_dest + 1; // make is bigger
 		 }
 
-
 		 if(first_point_dest < second_point_dest)
 		 {
 			 return potential_intersection_point1;
@@ -236,7 +235,7 @@ public class Cylinder implements Surface {
 	}
 
 	@Override
-	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray) {
+	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray) {
 		// TODO Auto-generated method stub
 		return null;
 	}

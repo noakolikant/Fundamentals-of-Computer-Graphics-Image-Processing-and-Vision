@@ -39,7 +39,7 @@ public class Sphere implements Surface{
 		return intersection_point;
 	}
 
-	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray)
+	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray)
 	{
 		// normal to the sphere at intersection poin
 		Vector normal = new Vector(intersection_point);

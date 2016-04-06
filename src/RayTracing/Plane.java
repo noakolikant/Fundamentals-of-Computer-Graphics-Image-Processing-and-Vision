@@ -33,7 +33,7 @@ public class Plane implements Surface {
 	}
 
 	@Override
-	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray) {
+	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray) {
 		// TODO Auto-generated method stub
 		return null;
 	}
