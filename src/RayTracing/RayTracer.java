@@ -77,6 +77,11 @@ public class RayTracer {
 
 		List<Surface> surfaces_list = new ArrayList<Surface>();
 		List<Material> materials_list = new ArrayList<Material>();
+		List<LightSource> light_sources_list = new ArrayList<LightSource>();
+		
+		Camera camera;
+		ColorAttribute background_color;
+		int shadow_rays_num, max_recursion_level;
 		
 		while ((line = r.readLine()) != null)
 		{
@@ -95,13 +100,24 @@ public class RayTracer {
 
 				if (code.equals("cam"))
 				{
-                                        // Add code here to parse camera parameters
-
+					Vector position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]),
+							Double.parseDouble(params[2]));
+					Vector look_at_point = new Vector(Double.parseDouble(params[3]), Double.parseDouble(params[4]),
+							Double.parseDouble(params[5]));
+					Vector up_vector = new Vector(Double.parseDouble(params[6]), Double.parseDouble(params[7]),
+							Double.parseDouble(params[8]));
+					
+					camera = new Camera(position, look_at_point, up_vector, Double.parseDouble(params[9]),
+							Double.parseDouble(params[10]));
+					
 					System.out.println(String.format("Parsed camera parameters (line %d)", lineNum));
 				}
 				else if (code.equals("set"))
 				{
-                                        // Add code here to parse general settings parameters
+					background_color = new ColorAttribute(Double.parseDouble(params[0]), 
+							Double.parseDouble(params[1]), Double.parseDouble(params[2]));
+					shadow_rays_num = Integer.parseInt(params[3]);
+					max_recursion_level = Integer.parseInt(params[4]);
 
 					System.out.println(String.format("Parsed general settings (line %d)", lineNum));
 				}
@@ -152,8 +168,16 @@ public class RayTracer {
 				}
 				else if (code.equals("lgt"))
 				{
-                                        // Add code here to parse light parameters
-
+					Vector position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]),
+							Double.parseDouble(params[2]));
+					ColorAttribute color = new ColorAttribute(Double.parseDouble(params[3]), 
+							Double.parseDouble(params[4]), Double.parseDouble(params[5]));
+					
+					LightSource light_source = new LightSource(position, color, Double.parseDouble(params[6]),
+							Double.parseDouble(params[7]), Double.parseDouble(params[8]));
+					
+					light_sources_list.add(light_source);
+							
 					System.out.println(String.format("Parsed light (line %d)", lineNum));
 				}
 				else
