@@ -39,9 +39,19 @@ public class Sphere implements Surface{
 		return intersection_point;
 	}
 
-	@Override
-	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray) {
-		// TODO Auto-generated method stub
-		return null;
+	public Ray get_mirrror_ray(Vector intersection_point, Ray incomming_ray)
+	{
+		// normal to the sphere at intersection poin
+		Vector normal = new Vector(intersection_point);
+		normal.substract(this.Center);
+		normal.normalize();
+		
+		Vector reflection_direction = new Vector(normal);
+		reflection_direction.multiplyByScalar(2 * normal.dot(incomming_ray.direction));
+		reflection_direction.add(incomming_ray.direction);
+		//R = 2 * dot(normal, incomming_ray_vector) + incomming_ray_vector
+		Ray reflection = new Ray(intersection_point, reflection_direction);
+		
+		return reflection;
 	}
 }
