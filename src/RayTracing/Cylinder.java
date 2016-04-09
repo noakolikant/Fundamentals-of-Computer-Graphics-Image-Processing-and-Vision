@@ -237,7 +237,6 @@ public class Cylinder implements Surface {
 	@Override
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray)
 	{
-		//TODO: check if the intersection point is on the disks or on the body.
 		//from_center_to_intersection_point - points from the cylinder center to the intersection point
 		Vector from_center_to_intersection_point = new Vector(intersection_point);
 		from_center_to_intersection_point.substract(this.Center);
@@ -255,9 +254,13 @@ public class Cylinder implements Surface {
 		}
 		else //intersection point is on the cylinder body
 		{
-			normal = new Vector(incomming_ray.direction);
-			normal.cross(this.pivot);
-			normal.cross(this.pivot); // I hope I got it all right with the ccc directiobs
+			normal = new Vector(intersection_point);
+			normal.substract(this.Center);
+			
+			Vector pivot_vector_part = new Vector(normal);
+			pivot_vector_part.dot(this.pivot);
+			
+			normal.substract(pivot_vector_part);
 		}
 
 		normal.normalize();
