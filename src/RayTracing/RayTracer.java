@@ -228,13 +228,63 @@ public class RayTracer {
 		return result;
 	}
 	
+	//note: this one is suppose to be the recursive function in the future
+	private Color calcPixelColor(Ray ray, int recusion_level)
+	{
+		if(0 == recusion_level)
+		{
+			Color color = new Color(); //color is initialized to (0, 0, 0) when constructed
+			return color;
+		}
+		
+		double min_dest_from_surface = 0;
+		Surface intersection_surface = null;
+		Vector potential_intersection_point = null, intersection_point = null;
+
+		/* Finding Closest intersection point*/
+		
+		//TODO: intersecting with lighting sources should be taken care at as well. 
+		
+		/* Iterating all surfaces to find closest intersection point*/
+		for(int i = 0; i < this.surfaces_list.size(); i++)
+		{
+			potential_intersection_point = this.surfaces_list.get(i).get_intersection_point_with_surface(ray);
+			if((null == intersection_point)
+					|| ((null != intersection_point) &&
+							(min_dest_from_surface > ray.get_dest_from_point(potential_intersection_point))))
+					{
+				intersection_point = potential_intersection_point;
+				min_dest_from_surface = ray.get_dest_from_point(intersection_point);
+				intersection_surface = this.surfaces_list.get(i);
+					}
+		}
+		
+		/* If the ray intersected with something (That is not a light source) create next rays */
+		if(null != intersection_point)
+		{
+			Ray reflection_ray = intersection_surface.get_reflection_ray(intersection_point, ray);
+			Ray transparent_ray = new Ray(intersection_point, ray.direction);
+			//TODO: color calculation with current intersection point
+			//TODO: call next recursion
+		}
+		else
+		{
+			//TODO: color calculations with bg color
+		}
+		//TODO: implement
+		return null;
+	}
+	
 	/**
 	 * Renders the loaded scene and saves it to the specified file location.
 	 */
 	public void renderScene(String outputFileName)
 	{
 		long startTime = System.currentTimeMillis();
-
+		
+		Ray initial_ray;
+		Color pixel_color;
+		
 		// Create a byte array to hold the pixel data:
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 		
@@ -242,7 +292,12 @@ public class RayTracer {
 		{
 			for(int j = 0; j < this.imageHeight; j++)
 			{
-				 ConstructRayThroughPixel(camera, i, j); 
+				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
+				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level);
+				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.red;
+				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.green;
+				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.blue;
+				 
 			}
 		}
                 // Put your ray tracing code here!
