@@ -11,4 +11,10 @@ public class Ray {
 		this.direction.normalize();
 	}
 
+	public double get_dest_from_point(Vector point)
+	{
+		Vector dest = new Vector(point);
+		dest.substract(this.start);
+		return dest.length();
+	}
 }
