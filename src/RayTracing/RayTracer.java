@@ -271,7 +271,7 @@ public class RayTracer {
 		{
 			//TODO: color calculations with bg color
 		}
-		//TODO: implement
+		//TODO: implement, return the color calculated so far
 		return null;
 	}
 	
