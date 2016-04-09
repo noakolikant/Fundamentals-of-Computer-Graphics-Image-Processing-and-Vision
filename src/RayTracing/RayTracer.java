@@ -19,6 +19,20 @@ public class RayTracer {
 
 	public int imageWidth;
 	public int imageHeight;
+	public Camera camera;
+	public ColorAttribute background_color;
+	public int shadow_rays_num;
+	public int max_recursion_level;
+	List<Surface> surfaces_list;
+	List<Material> materials_list;
+	List<LightSource> light_sources_list;
+	
+	public RayTracer()
+	{
+		this.surfaces_list = new ArrayList<Surface>();
+		this.materials_list = new ArrayList<Material>();
+		this.light_sources_list = new ArrayList<LightSource>();
+	}
 
 	/**
 	 * Runs the ray tracer. Takes scene file, output image file and image size as input.
@@ -28,8 +42,7 @@ public class RayTracer {
 		try {
 
 			RayTracer tracer = new RayTracer();
-
-                        // Default values:
+            // Default values:
 			tracer.imageWidth = 500;
 			tracer.imageHeight = 500;
 
@@ -74,15 +87,7 @@ public class RayTracer {
 		String line = null;
 		int lineNum = 0;
 		System.out.println("Started parsing scene file " + sceneFileName);
-
-		List<Surface> surfaces_list = new ArrayList<Surface>();
-		List<Material> materials_list = new ArrayList<Material>();
-		List<LightSource> light_sources_list = new ArrayList<LightSource>();
-		
-		Camera camera;
-		ColorAttribute background_color;
-		int shadow_rays_num, max_recursion_level;
-		
+				
 		while ((line = r.readLine()) != null)
 		{
 			line = line.trim();
@@ -107,17 +112,17 @@ public class RayTracer {
 					Vector up_vector = new Vector(Double.parseDouble(params[6]), Double.parseDouble(params[7]),
 							Double.parseDouble(params[8]));
 					
-					camera = new Camera(position, look_at_point, up_vector, Double.parseDouble(params[9]),
+					this.camera = new Camera(position, look_at_point, up_vector, Double.parseDouble(params[9]),
 							Double.parseDouble(params[10]));
 					
 					System.out.println(String.format("Parsed camera parameters (line %d)", lineNum));
 				}
 				else if (code.equals("set"))
 				{
-					background_color = new ColorAttribute(Double.parseDouble(params[0]), 
+					this.background_color = new ColorAttribute(Double.parseDouble(params[0]), 
 							Double.parseDouble(params[1]), Double.parseDouble(params[2]));
-					shadow_rays_num = Integer.parseInt(params[3]);
-					max_recursion_level = Integer.parseInt(params[4]);
+					this.shadow_rays_num = Integer.parseInt(params[3]);
+					this.max_recursion_level = Integer.parseInt(params[4]);
 
 					System.out.println(String.format("Parsed general settings (line %d)", lineNum));
 				}
@@ -133,7 +138,7 @@ public class RayTracer {
 					Material material = new Material(diffusive_color, Specular_color, Double.parseDouble(params[6]),
 							Reflection_color, Double.parseDouble(params[10]));
 					
-					materials_list.add(material);
+					this.materials_list.add(material);
 
 					System.out.println(String.format("Parsed material (line %d)", lineNum));
 				}
@@ -142,7 +147,7 @@ public class RayTracer {
 					Sphere sph = new Sphere(Double.parseDouble(params[0]), 
 							Double.parseDouble(params[1]), Double.parseDouble(params[2]),
 							Double.parseDouble(params[3]), Integer.parseInt(params[4]));
-					surfaces_list.add(sph);
+					this.surfaces_list.add(sph);
 
 					System.out.println(String.format("Parsed sphere (line %d)", lineNum));
 				}
@@ -151,7 +156,7 @@ public class RayTracer {
 					Plane plane = new Plane(new Vector(Double.parseDouble(params[0]),
 							Double.parseDouble(params[1]), Double.parseDouble(params[2])),
 							Double.parseDouble(params[3]), Integer.parseInt(params[4]));
-					surfaces_list.add(plane);
+					this.surfaces_list.add(plane);
 					System.out.println(String.format("Parsed plane (line %d)", lineNum));
 				}
 				else if (code.equals("cyl"))
@@ -162,7 +167,7 @@ public class RayTracer {
 							Double.parseDouble(params[5]), Double.parseDouble(params[6]),
 							Double.parseDouble(params[7]), Integer.parseInt(params[8])
 							);
-					surfaces_list.add(cylinder);
+					this.surfaces_list.add(cylinder);
 							
 					System.out.println(String.format("Parsed cylinder (line %d)", lineNum));
 				}
@@ -176,7 +181,7 @@ public class RayTracer {
 					LightSource light_source = new LightSource(position, color, Double.parseDouble(params[6]),
 							Double.parseDouble(params[7]), Double.parseDouble(params[8]));
 					
-					light_sources_list.add(light_source);
+					this.light_sources_list.add(light_source);
 							
 					System.out.println(String.format("Parsed light (line %d)", lineNum));
 				}
@@ -193,7 +198,36 @@ public class RayTracer {
 		System.out.println("Finished parsing scene file " + sceneFileName);
 
 	}
-
+	
+	private Ray ConstructRayThroughPixel(Camera camera, int i, int j)
+	{
+		Vector pixel_location = new Vector(camera.look_at_point);
+		pixel_location.normalize();
+		pixel_location.multiplyByScalar(camera.screen_distance);
+		pixel_location.add(camera.position); // now pixel_direction is pointing to the middle of the screen
+		
+		double pixel_width = camera.screen_width / this.imageWidth;
+		double delta_x = -(this.imageWidth / 2 - i) * pixel_width;
+		double delta_y = (this.imageHeight / 2 - j) * pixel_width;
+		
+		Vector delta_y_vector = new Vector(camera.up_vector);
+		delta_y_vector.normalize();
+		delta_y_vector.multiplyByScalar(delta_y);
+		pixel_location.add(delta_y_vector);
+		
+		Vector delta_x_vector = new Vector(camera.look_at_point);
+		delta_x_vector.cross(camera.up_vector);
+		delta_x_vector.normalize();
+		delta_x_vector.multiplyByScalar(delta_x);
+		pixel_location.add(delta_x_vector);
+		
+		Vector pixel_direction = new Vector(pixel_location);
+		pixel_direction.substract(camera.position);
+		
+		Ray result = new Ray(pixel_location, pixel_direction);
+		return result;
+	}
+	
 	/**
 	 * Renders the loaded scene and saves it to the specified file location.
 	 */
@@ -203,8 +237,14 @@ public class RayTracer {
 
 		// Create a byte array to hold the pixel data:
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
-
-
+		
+		for(int i = 0; i < this.imageWidth; i++)
+		{
+			for(int j = 0; j < this.imageHeight; j++)
+			{
+				 ConstructRayThroughPixel(camera, i, j); 
+			}
+		}
                 // Put your ray tracing code here!
                 //
                 // Write pixel color values in RGB format to rgbData:
