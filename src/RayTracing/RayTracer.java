@@ -201,6 +201,7 @@ public class RayTracer {
 	
 	private Ray ConstructRayThroughPixel(Camera camera, int i, int j)
 	{
+		// TODO: maybe we want to add it to the Camera ctor ? 
 		Vector pixel_location = new Vector(camera.look_at_point);
 		pixel_location.normalize();
 		pixel_location.multiplyByScalar(camera.screen_distance);
