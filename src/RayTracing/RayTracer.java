@@ -230,43 +230,78 @@ public class RayTracer {
 	{
 		if(0 == recusion_level)
 		{
+			// TODO: shouldn't it be Background color?
 			Color color = new Color(); //color is initialized to (0, 0, 0) when constructed
 			return color;
 		}
 		
 		double min_dest_from_surface = 0;
 		Surface intersection_surface = null;
-		Vector potential_intersection_point = null, intersection_point = null;
+		Vector potential_intersection_point = null, intersection_point_with_surface = null;
+		
+		double min_dest_from_light_source = 0;
+		LightSource intersection_light_source = null;
+		Vector potential_intersection_point_with_light_source = null, 
+				intersection_point_with_light_source = null;
 
 		/* Finding Closest intersection point*/
 		
-		//TODO: intersecting with lighting sources should be taken care at as well. 
+		/* Iterating all light sources to find closest intersection point*/
+		for (int i = 0; i < this.light_sources_list.size(); i++) {
+			if (this.light_sources_list.get(i).has_intersection_point_with_ray(ray)) {
+				potential_intersection_point_with_light_source = new Vector(this.light_sources_list.get(i).position);
+				potential_intersection_point_with_light_source.substract(ray.start);
+				if ((null == intersection_point_with_light_source) 
+						|| ((null != intersection_point_with_light_source) &&
+								(min_dest_from_light_source > potential_intersection_point_with_light_source.length()))) {
+					min_dest_from_light_source = potential_intersection_point_with_light_source.length();
+					potential_intersection_point_with_light_source = this.light_sources_list.get(i).position;
+					intersection_light_source = this.light_sources_list.get(i);
+				}
+			}
+		}
 		
 		/* Iterating all surfaces to find closest intersection point*/
 		for(int i = 0; i < this.surfaces_list.size(); i++)
 		{
 			potential_intersection_point = this.surfaces_list.get(i).get_intersection_point_with_surface(ray);
-			if((null == intersection_point)
-					|| ((null != intersection_point) &&
+			if((null == intersection_point_with_surface)
+					|| ((null != intersection_point_with_surface) &&
 							(min_dest_from_surface > ray.get_dest_from_point(potential_intersection_point))))
 					{
-				intersection_point = potential_intersection_point;
-				min_dest_from_surface = ray.get_dest_from_point(intersection_point);
+				intersection_point_with_surface = potential_intersection_point;
+				min_dest_from_surface = ray.get_dest_from_point(intersection_point_with_surface);
 				intersection_surface = this.surfaces_list.get(i);
 					}
 		}
 		
+		Boolean intersect_with_light = (null != intersection_point_with_light_source) && 
+				(null == intersection_point_with_surface || 
+				(min_dest_from_light_source < min_dest_from_surface));
+		Boolean intersect_with_surface = (null != intersection_point_with_surface) && 
+				(null == intersection_point_with_light_source || 
+				(min_dest_from_surface < min_dest_from_light_source));
+		assert intersect_with_light ^ intersect_with_surface; // XOR
+		
+		
 		/* If the ray intersected with something (That is not a light source) create next rays */
-		if(null != intersection_point)
+		if(intersect_with_surface)
 		{
-			Ray reflection_ray = intersection_surface.get_reflection_ray(intersection_point, ray);
-			Ray transparent_ray = new Ray(intersection_point, ray.direction);
+			Ray reflection_ray = intersection_surface.get_reflection_ray(intersection_point_with_surface, ray);
+			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			//TODO: color calculation with current intersection point
 			//TODO: call next recursion
 		}
 		else
 		{
-			//TODO: color calculations with bg color
+			if (intersect_with_light) {
+				
+			}
+			else {
+				//TODO: color calculations with bg color
+				// Color color = new Color(this.background_color);
+				// TODO: what is the diff between color and colorAttribute ??
+			}
 		}
 		//TODO: implement, return the color calculated so far
 		return null;
