@@ -18,4 +18,10 @@ public class Color {
 		this.blue = blue;
 		this.green = green;
 	}
+	
+	public Color(Color other) {
+		this.red = other.red;
+		this.green = other.green;
+		this.blue = other.blue;
+	}
 }
