@@ -24,4 +24,12 @@ public class Camera {
 		this.screen_distance = screen_distnace;
 		this.screen_width = screen_width;
 	}
+	
+	public Vector get_center_of_screen() {
+		Vector pixel_location = new Vector(this.look_at_point);
+		pixel_location.normalize();
+		pixel_location.multiplyByScalar(this.screen_distance);
+		pixel_location.add(this.position); // now pixel_direction is pointing to the middle of the screen
+		return pixel_location;
+	}
 }

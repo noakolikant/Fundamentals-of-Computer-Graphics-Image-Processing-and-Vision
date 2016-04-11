@@ -201,11 +201,7 @@ public class RayTracer {
 	
 	private Ray ConstructRayThroughPixel(Camera camera, int i, int j)
 	{
-		// TODO: maybe we want to add it to the Camera ctor ? 
-		Vector pixel_location = new Vector(camera.look_at_point);
-		pixel_location.normalize();
-		pixel_location.multiplyByScalar(camera.screen_distance);
-		pixel_location.add(camera.position); // now pixel_direction is pointing to the middle of the screen
+		Vector pixel_location = camera.get_center_of_screen();
 		
 		double pixel_width = camera.screen_width / this.imageWidth;
 		double delta_x = -(this.imageWidth / 2 - i) * pixel_width;
@@ -216,7 +212,7 @@ public class RayTracer {
 		delta_y_vector.multiplyByScalar(delta_y);
 		pixel_location.add(delta_y_vector);
 		
-		Vector delta_x_vector = new Vector(camera.look_at_point);
+		Vector delta_x_vector = new Vector(camera.look_at_point); //TODO I think it should be direction 
 		delta_x_vector.cross(camera.up_vector);
 		delta_x_vector.normalize();
 		delta_x_vector.multiplyByScalar(delta_x);
