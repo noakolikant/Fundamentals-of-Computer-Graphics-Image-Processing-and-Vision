@@ -281,7 +281,7 @@ public class RayTracer {
 		Boolean intersect_with_surface = (null != intersection_point_with_surface) && 
 				(null == intersection_point_with_light_source || 
 				(min_dest_from_surface < min_dest_from_light_source));
-		assert intersect_with_light ^ intersect_with_surface; // XOR
+		assert intersect_with_light ? !intersect_with_surface : true; // NAND
 		
 		
 		/* If the ray intersected with something (That is not a light source) create next rays */
