@@ -212,7 +212,7 @@ public class RayTracer {
 		delta_y_vector.multiplyByScalar(delta_y);
 		pixel_location.add(delta_y_vector);
 		
-		Vector delta_x_vector = new Vector(camera.look_at_point); //TODO I think it should be direction 
+		Vector delta_x_vector = new Vector(camera.direction);
 		delta_x_vector.cross(camera.up_vector);
 		delta_x_vector.normalize();
 		delta_x_vector.multiplyByScalar(delta_x);
