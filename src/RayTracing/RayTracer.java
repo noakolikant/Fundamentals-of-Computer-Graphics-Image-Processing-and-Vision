@@ -20,7 +20,7 @@ public class RayTracer {
 	public int imageWidth;
 	public int imageHeight;
 	public Camera camera;
-	public ColorAttribute background_color;
+	public Color background_color;
 	public int shadow_rays_num;
 	public int max_recursion_level;
 	List<Surface> surfaces_list;
@@ -119,8 +119,8 @@ public class RayTracer {
 				}
 				else if (code.equals("set"))
 				{
-					this.background_color = new ColorAttribute(Double.parseDouble(params[0]), 
-							Double.parseDouble(params[1]), Double.parseDouble(params[2]));
+					this.background_color = new Color(Byte.parseByte(params[0]), 
+							Byte.parseByte(params[1]), Byte.parseByte(params[2]));
 					this.shadow_rays_num = Integer.parseInt(params[3]);
 					this.max_recursion_level = Integer.parseInt(params[4]);
 
@@ -230,8 +230,7 @@ public class RayTracer {
 	{
 		if(0 == recusion_level)
 		{
-			// TODO: shouldn't it be Background color?
-			Color color = new Color(); //color is initialized to (0, 0, 0) when constructed
+			Color color = new Color(this.background_color);
 			return color;
 		}
 		
@@ -300,7 +299,7 @@ public class RayTracer {
 			else {
 				//TODO: color calculations with bg color
 				// Color color = new Color(this.background_color);
-				// TODO: what is the diff between color and colorAttribute ??
+				// TODO: what is the diff between color and colorAttribute ?? - Color is the actual rgb values Color Attribute is a material attribute like diffusive color and specular... Or maybe I got it wrong?
 			}
 		}
 		//TODO: implement, return the color calculated so far
