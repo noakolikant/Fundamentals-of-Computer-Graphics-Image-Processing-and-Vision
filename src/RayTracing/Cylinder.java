@@ -237,8 +237,25 @@ public class Cylinder implements Surface {
 	@Override
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray)
 	{
+		Vector normal = this.get_normal_direction(intersection_point);
+		normal.normalize();
+
+		Vector reflection_direction = new Vector(normal);
+		reflection_direction.multiplyByScalar(2 * normal.dot(incomming_ray.direction));
+		reflection_direction.add(incomming_ray.direction);
+		//R = 2 * dot(normal, incomming_ray_vector) + incomming_ray_vector
+		Ray reflection = new Ray(intersection_point, reflection_direction);
+
+		return reflection;	
+	}
+	
+	public int get_material_index() {
+		return this.material_index;
+	}
+
+	public Vector get_normal_direction(Vector point) {
 		//from_center_to_intersection_point - points from the cylinder center to the intersection point
-		Vector from_center_to_intersection_point = new Vector(intersection_point);
+		Vector from_center_to_intersection_point = new Vector(point);
 		from_center_to_intersection_point.substract(this.Center);
 		Vector normal;
 
@@ -254,7 +271,7 @@ public class Cylinder implements Surface {
 		}
 		else //intersection point is on the cylinder body
 		{
-			normal = new Vector(intersection_point);
+			normal = new Vector(point);
 			normal.substract(this.Center);
 			
 			Vector pivot_vector_part = new Vector(normal);
@@ -263,18 +280,7 @@ public class Cylinder implements Surface {
 			normal.substract(pivot_vector_part);
 		}
 
-		normal.normalize();
-
-		Vector reflection_direction = new Vector(normal);
-		reflection_direction.multiplyByScalar(2 * normal.dot(incomming_ray.direction));
-		reflection_direction.add(incomming_ray.direction);
-		//R = 2 * dot(normal, incomming_ray_vector) + incomming_ray_vector
-		Ray reflection = new Ray(intersection_point, reflection_direction);
-
-		return reflection;	
-	}
-	
-	public int get_material_index() {
-		return this.material_index;
+		normal.normalize();		
+		return normal;
 	}
 }
