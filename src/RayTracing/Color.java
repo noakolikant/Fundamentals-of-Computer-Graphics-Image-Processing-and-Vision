@@ -24,4 +24,11 @@ public class Color {
 		this.green = other.green;
 		this.blue = other.blue;
 	}
+	
+	public void add(Color other)
+	{
+		this.red += other.red;
+		this.blue += other.blue;
+		this.green += other.green;
+	}
 }
