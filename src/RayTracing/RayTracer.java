@@ -333,18 +333,18 @@ public class RayTracer {
 		
 		double min_dest_from_surface = 0;
 		Vector intersection_point_with_surface = null;
-		SurfaceIntersection surface_intersection= this.find_closest_intersection_with_surface(ray);
+		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray);
 		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
 		double min_dest_from_light_source = 0;
 		Vector intersection_point_with_light_source = null;
 		
-		if (null != intersection_point_with_surface) {
+		if (null != surface_intersection) {
 			min_dest_from_surface = surface_intersection.distance;
 			intersection_point_with_surface = surface_intersection.intersection;
 		}
 
 		/* Finding Closest intersection point*/
-		if (null != intersection_point_with_light_source) {
+		if (null != light_source_intersection) {
 			min_dest_from_light_source = light_source_intersection.distance;
 			intersection_point_with_light_source = light_source_intersection.intersection;
 		}
