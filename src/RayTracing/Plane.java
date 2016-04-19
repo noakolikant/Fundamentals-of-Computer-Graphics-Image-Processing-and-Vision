@@ -49,5 +49,10 @@ public class Plane implements Surface {
 	public int get_material_index() {
 		return this.material_index;
 	}
+
+	public Vector get_normal_direction(Vector point)
+	{
+		return this.normal;
+	}
 	
 }
