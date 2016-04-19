@@ -54,4 +54,8 @@ public class Sphere implements Surface{
 		
 		return reflection;
 	}
+	
+	public int get_material_index() {
+		return this.material_index;
+	}
 }

@@ -45,4 +45,9 @@ public class Plane implements Surface {
 		Ray reflection = new Ray(intersection_point, reflection_direction);
 		return reflection;
 	}
+	
+	public int get_material_index() {
+		return this.material_index;
+	}
+	
 }
