@@ -16,10 +16,10 @@ public class ColorAttribute {
 		this.green = green * factor;
 		this.blue = blue * factor;
 	}
-	
-	public ColorAttribute(ColorAttribute color, double factor) {
-		this.red = color.red * factor;
-		this.green = color.green * factor;
-		this.blue = color.blue * factor;
+
+	public ColorAttribute(Color color, double specular_intensity) {
+		this.red = color.red * specular_intensity;
+		this.green = color.green * specular_intensity;
+		this.blue = color.blue * specular_intensity;
 	}
 }
