@@ -3,16 +3,16 @@ package RayTracing;
 public class LightSource {
 	Vector position;
 	Color color;
-	ColorAttribute specular_intensity;
+	double specular_intensity;
 	double shadow_intensity;
 	double light_radius;
 	
 	public LightSource(Vector position, Color color, 
-			double specular_intnesity, double shadow_intensity,
+			double specular_intensity, double shadow_intensity,
 			double light_radius) {
 		this.position = position;
 		this.color = color;
-		this.specular_intensity = new ColorAttribute(this.color, specular_intnesity);
+		this.specular_intensity = specular_intensity;
 		this.shadow_intensity = shadow_intensity;
 		this.light_radius = light_radius;
 	}
