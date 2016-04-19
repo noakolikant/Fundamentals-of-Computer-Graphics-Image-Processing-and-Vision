@@ -58,4 +58,11 @@ public class Sphere implements Surface{
 	public int get_material_index() {
 		return this.material_index;
 	}
+
+	public Vector get_normal_direction(Vector point) 
+	{
+		Vector normal = new Vector(point);
+		normal.substract(this.Center);
+		return normal;
+	}
 }
