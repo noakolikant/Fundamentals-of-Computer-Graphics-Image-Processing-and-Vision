@@ -76,7 +76,9 @@ public class Vector {
 	 */
 	public void normalize() {
 		double length = length();
-		assert length != 0;
+		if (length == 0) {
+			return;
+		}
 		this.x_cor /= length;
 		this.y_cor /= length;
 		this.z_cor /= length;

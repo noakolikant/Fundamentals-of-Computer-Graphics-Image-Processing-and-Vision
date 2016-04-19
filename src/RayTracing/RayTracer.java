@@ -224,11 +224,11 @@ public class RayTracer {
 		return result;
 	}
 	
-	private Boolean isLineOfSight(Vector start_point, Vector end_point) {
+	private Boolean isLineOfSight(Surface surface, Vector start_point, Vector end_point) {
 		Vector direction = new Vector(end_point);
 		direction.substract(start_point);
 		Ray ray = new Ray(start_point, direction);
-		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray);
+		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray, surface);
 		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
 		double distance = direction.length();
 		if (null != surface_intersection) {
@@ -258,20 +258,26 @@ public class RayTracer {
 				if ((null == intersection_point_with_light_source) 
 						|| ((null != intersection_point_with_light_source) &&
 								(min_dest_from_light_source > potential_intersection_point_with_light_source.length()))) {
+					if (potential_intersection_point_with_light_source.length() == 0) {
+						continue;
+					}
 					min_dest_from_light_source = potential_intersection_point_with_light_source.length();
 					potential_intersection_point_with_light_source = this.light_sources_list.get(i).position;
 					intersection_light_source = this.light_sources_list.get(i);
 				}
 			}
 		}
+		if (null == intersection_light_source) {
+			return null;
+		}
 		return new LightSourceIntersection(intersection_light_source, intersection_point_with_light_source, min_dest_from_light_source);
 	}
 	
 	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
-		Color diffuse_color = new Color();
+		Color diffuse_color = new Color((byte)0, (byte)0, (byte)0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
+			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i).position) == true) {
 				Color light = new Color();
 				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.diffusive_color);
@@ -285,10 +291,10 @@ public class RayTracer {
 	}
 	
 	private Color get_specular_color(SurfaceIntersection surface_intersection, Vector origin, Vector reflection) {
-		Color specular_color = new Color();
+		Color specular_color = new Color((byte)0, (byte)0, (byte)0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
+			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i).position) == true) {
 				Color light = new Color();
 				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.specular_color);
@@ -302,22 +308,29 @@ public class RayTracer {
 		return specular_color;
 	}
 	
-	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray) {
+	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray, Surface origin_surface) {
 		double min_dest_from_surface = 0;
 		Surface intersection_surface = null;
 		Vector potential_intersection_point = null, intersection_point_with_surface = null;
 		/* Iterating all surfaces to find closest intersection point*/
 		for(int i = 0; i < this.surfaces_list.size(); i++)
 		{
+			if (origin_surface == this.surfaces_list.get(i)) {
+				continue;
+			}
 			potential_intersection_point = this.surfaces_list.get(i).get_intersection_point_with_surface(ray);
-			if((null == intersection_point_with_surface)
+			if((null != potential_intersection_point) &&
+					((null == intersection_point_with_surface)
 					|| ((null != intersection_point_with_surface) &&
-							(min_dest_from_surface > ray.get_dest_from_point(potential_intersection_point))))
+							(min_dest_from_surface > ray.get_dest_from_point(potential_intersection_point)))))
 					{
 				intersection_point_with_surface = potential_intersection_point;
 				min_dest_from_surface = ray.get_dest_from_point(intersection_point_with_surface);
 				intersection_surface = this.surfaces_list.get(i);
 					}
+		}
+		if (null == intersection_surface) {
+			return null;
 		}
 		return new SurfaceIntersection(intersection_surface, intersection_point_with_surface, min_dest_from_surface);
 		
@@ -334,7 +347,7 @@ public class RayTracer {
 		
 		double min_dest_from_surface = 0;
 		Vector intersection_point_with_surface = null;
-		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray);
+		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray, null);
 		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
 		double min_dest_from_light_source = 0;
 		Vector intersection_point_with_light_source = null;
