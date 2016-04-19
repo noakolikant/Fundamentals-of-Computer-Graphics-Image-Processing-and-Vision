@@ -268,7 +268,7 @@ public class RayTracer {
 		return new LightSourceIntersection(intersection_light_source, intersection_point_with_light_source, min_dest_from_light_source);
 	}
 	
-	private Color get_diffuse_color(SurfaceIntersection surface_intersection, Vector origin) {
+	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
 		Color diffuse_color = new Color();
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
@@ -345,7 +345,7 @@ public class RayTracer {
 		/* If the ray intersected with something (That is not a light source) create next rays */
 		if(intersect_with_surface)
 		{
-			
+			Color diffusive_color = this.get_diffuse_color(surface_intersection);
 			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			//TODO: color calculation with current intersection point
