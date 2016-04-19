@@ -174,8 +174,8 @@ public class RayTracer {
 				{
 					Vector position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]),
 							Double.parseDouble(params[2]));
-					ColorAttribute color = new ColorAttribute(Byte.parseByte(params[3]), 
-							Byte.parseByte(params[4]), Byte.parseByte(params[5]));
+					ColorAttribute color = new ColorAttribute(Double.parseDouble(params[3]), 
+							Double.parseDouble(params[4]), Double.parseDouble(params[5]));
 					
 					LightSource light_source = new LightSource(position, color, Double.parseDouble(params[6]),
 							Double.parseDouble(params[7]), Double.parseDouble(params[8]));
