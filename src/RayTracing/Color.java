@@ -7,9 +7,9 @@ public class Color {
 	
 	public Color()
 	{
-		this.red = 0;
-		this.green = 0;
-		this.blue = 0;
+		this.red = (byte) 255;
+		this.green = (byte) 255;
+		this.blue = (byte) 255;
 	}
 	
 	public Color(byte red, byte blue, byte green)

@@ -61,7 +61,6 @@ public class RayTracer {
 
 			// Parse scene file:
 			tracer.parseScene(sceneFileName);
-
 			// Render scene:
 			tracer.renderScene(outputFileName);
 
@@ -175,7 +174,7 @@ public class RayTracer {
 				{
 					Vector position = new Vector(Double.parseDouble(params[0]), Double.parseDouble(params[1]),
 							Double.parseDouble(params[2]));
-					Color color = new Color(Byte.parseByte(params[3]), 
+					ColorAttribute color = new ColorAttribute(Byte.parseByte(params[3]), 
 							Byte.parseByte(params[4]), Byte.parseByte(params[5]));
 					
 					LightSource light_source = new LightSource(position, color, Double.parseDouble(params[6]),
@@ -273,7 +272,8 @@ public class RayTracer {
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
 			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
-				Color light = new Color(this.light_sources_list.get(i).color);
+				Color light = new Color();
+				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.diffusive_color);
 				Vector direction = new Vector(this.light_sources_list.get(i).position);
 				direction.substract(surface_intersection.intersection);
@@ -289,7 +289,8 @@ public class RayTracer {
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
 			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
-				Color light = new Color(this.light_sources_list.get(i).color);
+				Color light = new Color();
+				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.specular_color);
 				light.multiply_with_scalar(this.light_sources_list.get(i).specular_intensity);
 				Vector direction = new Vector(surface_intersection.intersection);

@@ -2,12 +2,12 @@ package RayTracing;
 
 public class LightSource {
 	Vector position;
-	Color color;
+	ColorAttribute color;
 	double specular_intensity;
 	double shadow_intensity;
 	double light_radius;
 	
-	public LightSource(Vector position, Color color, 
+	public LightSource(Vector position, ColorAttribute color, 
 			double specular_intensity, double shadow_intensity,
 			double light_radius) {
 		this.position = position;
