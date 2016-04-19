@@ -1,7 +1,6 @@
 package RayTracing;
 
 public interface Surface {
-	public int material_index = -1;
 	
 	/**
 	 * Returns the intersection point represented as a Vector. If there is not returns null
