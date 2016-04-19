@@ -42,8 +42,7 @@ public class Sphere implements Surface{
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray)
 	{
 		// normal to the sphere at intersection poin
-		Vector normal = new Vector(intersection_point);
-		normal.substract(this.Center);
+		Vector normal = this.get_normal_direction(intersection_point);
 		normal.normalize();
 		
 		Vector reflection_direction = new Vector(normal);
