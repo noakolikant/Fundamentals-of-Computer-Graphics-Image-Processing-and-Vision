@@ -31,4 +31,11 @@ public class Color {
 		this.blue += other.blue;
 		this.green += other.green;
 	}
+	
+	public void multiply_with_colorAttribute(ColorAttribute color_attribute)
+	{
+		this.red *= color_attribute.red;
+		this.blue *= color_attribute.blue;
+		this.green *= color_attribute.green;
+	}
 }
