@@ -225,26 +225,15 @@ public class RayTracer {
 		return result;
 	}
 	
-	//note: this one is suppose to be the recursive function in the future
-	private Color calcPixelColor(Ray ray, int recusion_level)
-	{
-		if(0 == recusion_level)
-		{
-			Color color = new Color(this.background_color);
-			return color;
-		}
+	private Boolean isLineOfSight(Vector start_point, Vector end_point) {
 		
-		double min_dest_from_surface = 0;
-		Surface intersection_surface = null;
-		Vector potential_intersection_point = null, intersection_point_with_surface = null;
-		
+	}
+	
+	private LightSourceIntersection find_closest_intersection_with_light_source(Ray ray) {
 		double min_dest_from_light_source = 0;
 		LightSource intersection_light_source = null;
 		Vector potential_intersection_point_with_light_source = null, 
 				intersection_point_with_light_source = null;
-
-		/* Finding Closest intersection point*/
-		
 		/* Iterating all light sources to find closest intersection point*/
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
 			if (this.light_sources_list.get(i).has_intersection_point_with_ray(ray)) {
@@ -259,7 +248,13 @@ public class RayTracer {
 				}
 			}
 		}
-		
+		return new LightSourceIntersection(intersection_light_source, intersection_point_with_light_source, min_dest_from_light_source);
+	}
+	
+	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray) {
+		double min_dest_from_surface = 0;
+		Surface intersection_surface = null;
+		Vector potential_intersection_point = null, intersection_point_with_surface = null;
 		/* Iterating all surfaces to find closest intersection point*/
 		for(int i = 0; i < this.surfaces_list.size(); i++)
 		{
@@ -273,6 +268,36 @@ public class RayTracer {
 				intersection_surface = this.surfaces_list.get(i);
 					}
 		}
+		return new SurfaceIntersection(intersection_surface, intersection_point_with_surface, min_dest_from_surface);
+		
+	}
+	
+	//note: this one is suppose to be the recursive function in the future
+	private Color calcPixelColor(Ray ray, int recusion_level)
+	{
+		if(0 == recusion_level)
+		{
+			Color color = new Color(this.background_color);
+			return color;
+		}
+		
+		double min_dest_from_surface = 0;
+		Vector intersection_point_with_surface = null;
+		SurfaceIntersection surface_intersection= this.find_closest_intersection_with_surface(ray);
+		if (null != intersection_point_with_surface) {
+			min_dest_from_surface = surface_intersection.distance;
+			intersection_point_with_surface = surface_intersection.intersection;
+		}
+
+		/* Finding Closest intersection point*/
+		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
+		double min_dest_from_light_source = 0;
+		Vector intersection_point_with_light_source = null;
+		if (null != intersection_point_with_light_source) {
+			min_dest_from_light_source = light_source_intersection.distance;
+			intersection_point_with_light_source = light_source_intersection.intersection;
+		}
+		
 		
 		Boolean intersect_with_light = (null != intersection_point_with_light_source) && 
 				(null == intersection_point_with_surface || 
@@ -286,7 +311,7 @@ public class RayTracer {
 		/* If the ray intersected with something (That is not a light source) create next rays */
 		if(intersect_with_surface)
 		{
-			Ray reflection_ray = intersection_surface.get_reflection_ray(intersection_point_with_surface, ray);
+			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			//TODO: color calculation with current intersection point
 			//TODO: call next recursion
