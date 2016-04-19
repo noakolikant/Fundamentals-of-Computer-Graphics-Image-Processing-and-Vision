@@ -18,4 +18,6 @@ public interface Surface {
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray);
 	
 	public int get_material_index();
+	
+	public Vector get_normal_direction(Vector point);
 }
