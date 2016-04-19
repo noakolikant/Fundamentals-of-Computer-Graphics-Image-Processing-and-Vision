@@ -327,7 +327,7 @@ public class RayTracer {
 	{
 		if(0 == recusion_level)
 		{
-			Color color = new Color(this.background_color);
+			Color color = new Color(this.background_color); // TODO: return (0,0,0) ?
 			return color;
 		}
 		
@@ -362,22 +362,32 @@ public class RayTracer {
 		/* If the ray intersected with something (That is not a light source) create next rays */
 		if(intersect_with_surface)
 		{
+			double material_transperncy = this.materials_list.get(surface_intersection.surface.get_material_index()).transperacy;
 			Color diffusive_color = this.get_diffuse_color(surface_intersection);
 			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
-			Color get_specular_color = this.get_specular_color(surface_intersection, ray.start, reflection_ray.direction);
+			Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1);
+			
+			Color specular_color = this.get_specular_color(surface_intersection, ray.start, reflection_ray.direction);
+			Color non_recursive_color = new Color(diffusive_color);
+			non_recursive_color.add(specular_color);
+			non_recursive_color.multiply_with_scalar(1 - material_transperncy);
+			
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
-			//TODO: color calculation with current intersection point
-			//TODO: call next recursion
+			Color transparent_color = this.calcPixelColor(transparent_ray, recusion_level-1);
+			transparent_color.multiply_with_scalar(material_transperncy);
+			Color result = new Color(non_recursive_color);
+			result.add(transparent_color);
+			result.add(reflection_color);
+			return result;
 		}
 		else
 		{
 			if (intersect_with_light) {
-				
+				// TODO ?
 			}
 			else {
-				//TODO: color calculations with bg color
-				// Color color = new Color(this.background_color);
-				// TODO: what is the diff between color and colorAttribute ?? - Color is the actual rgb values Color Attribute is a material attribute like diffusive color and specular... Or maybe I got it wrong?
+				Color color = new Color(this.background_color);
+				return color;
 			}
 		}
 		//TODO: implement, return the color calculated so far
