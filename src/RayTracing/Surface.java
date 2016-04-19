@@ -1,6 +1,7 @@
 package RayTracing;
 
 public interface Surface {
+	public int material_index = -1;
 	
 	/**
 	 * Returns the intersection point represented as a Vector. If there is not returns null
@@ -16,4 +17,6 @@ public interface Surface {
 	 * @return the mirror outgoing ray
 	 */
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray);
+	
+	public int get_material_index();
 }

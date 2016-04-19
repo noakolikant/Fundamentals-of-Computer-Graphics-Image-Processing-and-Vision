@@ -237,7 +237,8 @@ public class RayTracer {
 				return false;
 			}
 		}
-		if (null != light_source_intersection) {
+		// TODO: ?
+		if (false && null != light_source_intersection) {
 			if (light_source_intersection.distance < distance) {
 				return false;
 			}
@@ -265,6 +266,15 @@ public class RayTracer {
 			}
 		}
 		return new LightSourceIntersection(intersection_light_source, intersection_point_with_light_source, min_dest_from_light_source);
+	}
+	
+	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
+		Color diffuse_color = new Color();
+		for (int i = 0; i < this.light_sources_list.size(); i++) {
+			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
+				Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
+			}
+		}
 	}
 	
 	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray) {
@@ -300,15 +310,16 @@ public class RayTracer {
 		double min_dest_from_surface = 0;
 		Vector intersection_point_with_surface = null;
 		SurfaceIntersection surface_intersection= this.find_closest_intersection_with_surface(ray);
+		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
+		double min_dest_from_light_source = 0;
+		Vector intersection_point_with_light_source = null;
+		
 		if (null != intersection_point_with_surface) {
 			min_dest_from_surface = surface_intersection.distance;
 			intersection_point_with_surface = surface_intersection.intersection;
 		}
 
 		/* Finding Closest intersection point*/
-		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
-		double min_dest_from_light_source = 0;
-		Vector intersection_point_with_light_source = null;
 		if (null != intersection_point_with_light_source) {
 			min_dest_from_light_source = light_source_intersection.distance;
 			intersection_point_with_light_source = light_source_intersection.intersection;
@@ -327,6 +338,7 @@ public class RayTracer {
 		/* If the ray intersected with something (That is not a light source) create next rays */
 		if(intersect_with_surface)
 		{
+			
 			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			//TODO: color calculation with current intersection point
