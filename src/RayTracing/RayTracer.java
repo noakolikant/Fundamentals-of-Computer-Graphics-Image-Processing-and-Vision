@@ -284,6 +284,23 @@ public class RayTracer {
 		return diffuse_color;
 	}
 	
+	private Color get_specular_color(SurfaceIntersection surface_intersection, Vector origin, Vector reflection) {
+		Color specular_color = new Color();
+		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
+		for (int i = 0; i < this.light_sources_list.size(); i++) {
+			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
+				Color light = new Color(this.light_sources_list.get(i).color);
+				light.multiply_with_colorAttribute(material.specular_color);
+				light.multiply_with_scalar(this.light_sources_list.get(i).specular_intensity);
+				Vector direction = new Vector(surface_intersection.intersection);
+				direction.substract(origin);
+				light.multiply_with_scalar(Math.pow(reflection.dot(direction), material.phong_specularity));
+				specular_color.add(light);
+			}
+		}
+		return specular_color;
+	}
+	
 	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray) {
 		double min_dest_from_surface = 0;
 		Surface intersection_surface = null;
@@ -347,6 +364,7 @@ public class RayTracer {
 		{
 			Color diffusive_color = this.get_diffuse_color(surface_intersection);
 			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
+			Color get_specular_color = this.get_specular_color(surface_intersection, ray.start, reflection_ray.direction);
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			//TODO: color calculation with current intersection point
 			//TODO: call next recursion
