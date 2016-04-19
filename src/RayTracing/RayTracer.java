@@ -226,7 +226,23 @@ public class RayTracer {
 	}
 	
 	private Boolean isLineOfSight(Vector start_point, Vector end_point) {
-		
+		Vector direction = new Vector(end_point);
+		direction.substract(start_point);
+		Ray ray = new Ray(start_point, direction);
+		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray);
+		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
+		double distance = direction.length();
+		if (null != surface_intersection) {
+			if (surface_intersection.distance < distance) {
+				return false;
+			}
+		}
+		if (null != light_source_intersection) {
+			if (light_source_intersection.distance < distance) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private LightSourceIntersection find_closest_intersection_with_light_source(Ray ray) {
