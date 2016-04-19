@@ -268,13 +268,20 @@ public class RayTracer {
 		return new LightSourceIntersection(intersection_light_source, intersection_point_with_light_source, min_dest_from_light_source);
 	}
 	
-	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
+	private Color get_diffuse_color(SurfaceIntersection surface_intersection, Vector origin) {
 		Color diffuse_color = new Color();
+		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
 			if (this.isLineOfSight(surface_intersection.intersection, light_sources_list.get(i).position) == true) {
-				Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
+				Color light = new Color(this.light_sources_list.get(i).color);
+				light.multiply_with_colorAttribute(material.diffusive_color);
+				Vector direction = new Vector(this.light_sources_list.get(i).position);
+				direction.substract(surface_intersection.intersection);
+				light.multiply_with_scalar(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction));
+				diffuse_color.add(light);
 			}
 		}
+		return diffuse_color;
 	}
 	
 	private SurfaceIntersection find_closest_intersection_with_surface(Ray ray) {

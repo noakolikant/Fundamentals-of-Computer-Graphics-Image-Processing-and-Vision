@@ -38,4 +38,11 @@ public class Color {
 		this.blue *= color_attribute.blue;
 		this.green *= color_attribute.green;
 	}
+	
+	public void multiply_with_scalar(double scalar)
+	{
+		this.red *= scalar;
+		this.blue *= scalar;
+		this.green *= scalar;
+	}
 }
