@@ -11,7 +11,7 @@ public class Material {
 			double phong_specularity, ColorAttribute Reflection_color, double transperacy)
 	{
 		this.diffusive_color = diffusive_color;
-		this.specular_color = specular_color;
+		this.specular_color = Specular_color;
 		this.phong_specularity = phong_specularity;
 		this.Reflection_color = Reflection_color;
 		this.transperacy = transperacy;
