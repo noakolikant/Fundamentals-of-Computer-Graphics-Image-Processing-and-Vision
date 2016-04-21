@@ -277,7 +277,7 @@ public class RayTracer {
 		Color diffuse_color = new Color((byte)0, (byte)0, (byte)0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i - 1).position) == true) {
+			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i).position) == true) {
 				Color light = new Color();
 				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.diffusive_color);
