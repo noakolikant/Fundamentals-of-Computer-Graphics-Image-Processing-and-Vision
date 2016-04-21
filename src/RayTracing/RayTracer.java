@@ -131,10 +131,10 @@ public class RayTracer {
 							Double.parseDouble(params[1]), Double.parseDouble(params[2]));
 					ColorAttribute Specular_color = new ColorAttribute(Double.parseDouble(params[3]), 
 							Double.parseDouble(params[4]), Double.parseDouble(params[5]));
-					ColorAttribute Reflection_color = new ColorAttribute(Double.parseDouble(params[7]), 
-							Double.parseDouble(params[8]), Double.parseDouble(params[9]));
+					ColorAttribute Reflection_color = new ColorAttribute(Double.parseDouble(params[6]), 
+							Double.parseDouble(params[7]), Double.parseDouble(params[8]));
 					
-					Material material = new Material(diffusive_color, Specular_color, Double.parseDouble(params[6]),
+					Material material = new Material(diffusive_color, Specular_color, Double.parseDouble(params[9]),
 							Reflection_color, Double.parseDouble(params[10]));
 					
 					this.materials_list.add(material);
@@ -376,7 +376,7 @@ public class RayTracer {
 		/* If the ray intersected with something (That is not a light source) create next rays */
 		if(intersect_with_surface)
 		{
-			double material_transperncy = this.materials_list.get(surface_intersection.surface.get_material_index()).transperacy;
+			double material_transperncy = this.materials_list.get(surface_intersection.surface.get_material_index() - 1).transperacy;
 			Color diffusive_color = this.get_diffuse_color(surface_intersection);
 			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
 			Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1);
