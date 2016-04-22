@@ -214,7 +214,7 @@ public class RayTracer {
 		Vector delta_x_vector = new Vector(camera.direction);
 		delta_x_vector.cross(camera.up_vector);
 		delta_x_vector.normalize();
-		delta_x_vector.multiplyByScalar(delta_x);
+		delta_x_vector.multiplyByScalar(-delta_x);
 		pixel_location.add(delta_x_vector);
 		
 		Vector pixel_direction = new Vector(pixel_location);
@@ -230,7 +230,7 @@ public class RayTracer {
 		Ray ray = new Ray(start_point, direction);
 		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray, surface);
 		LightSourceIntersection light_source_intersection = this.find_closest_intersection_with_light_source(ray);
-		double distance = direction.length();
+		double distance = direction.length(); 
 		if (null != surface_intersection) {
 			if (surface_intersection.distance < distance) {
 				return false;
@@ -274,16 +274,18 @@ public class RayTracer {
 	}
 	
 	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
-		Color diffuse_color = new Color((byte)0, (byte)0, (byte)0);
+		Color diffuse_color = new Color(0, 0, 0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i).position) == true) {
-				Color light = new Color();
+			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection,
+					light_sources_list.get(i).position)) {
+				Color light = new Color(255, 255, 255);
 				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
 				light.multiply_with_colorAttribute(material.diffusive_color);
 				Vector direction = new Vector(this.light_sources_list.get(i).position);
 				direction.substract(surface_intersection.intersection);
-				light.multiply_with_scalar(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction));
+				direction.normalize();
+				light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
 				diffuse_color.add(light);
 			}
 		}
@@ -292,7 +294,7 @@ public class RayTracer {
 	
 	private Color get_specular_color(SurfaceIntersection surface_intersection, Vector origin, Vector reflection) {
 		Color specular_color = new Color((byte)0, (byte)0, (byte)0);
-		Material material = this.materials_list.get(surface_intersection.surface.get_material_index());
+		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
 			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection, light_sources_list.get(i).position) == true) {
 				Color light = new Color();
@@ -378,22 +380,24 @@ public class RayTracer {
 		{
 			double material_transperncy = this.materials_list.get(surface_intersection.surface.get_material_index() - 1).transperacy;
 			Color diffusive_color = this.get_diffuse_color(surface_intersection);
-			Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
-			Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1);
+		//	Ray reflection_ray = surface_intersection.surface.get_reflection_ray(intersection_point_with_surface, ray);
+//			Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1);
 			
-			Color specular_color = this.get_specular_color(surface_intersection, ray.start, reflection_ray.direction);
+		//	Color specular_color = this.get_specular_color(surface_intersection, ray.start, reflection_ray.direction);
 			Color non_recursive_color = new Color(diffusive_color);
-			non_recursive_color.add(specular_color);
+		//	non_recursive_color.add(specular_color);
 			non_recursive_color.multiply_with_scalar(1 - material_transperncy);
-			
+		/*	
 			Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 			Color transparent_color = this.calcPixelColor(transparent_ray, recusion_level-1);
-			transparent_color.multiply_with_scalar(material_transperncy);
+			transparent_color.multiply_with_scalar(material_transperncy);*/
 			Color result = new Color(non_recursive_color);
+			/*
 			result.add(transparent_color);
-			result.add(reflection_color);
+			result.add(reflection_color);*/
 			return result;
 		}
+		
 		else
 		{
 			if (intersect_with_light) {
@@ -427,21 +431,12 @@ public class RayTracer {
 			{
 				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
 				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level);
-				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.red;
-				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.green;
-				 rgbData[(j * this.imageWidth + i) * 3] = pixel_color.blue;
+				 rgbData[(j * this.imageWidth + i) * 3] = (byte)pixel_color.red;
+				 rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)pixel_color.green;
+				 rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)pixel_color.blue;
 				 
 			}
 		}
-                // Put your ray tracing code here!
-                //
-                // Write pixel color values in RGB format to rgbData:
-                // Pixel [x, y] red component is in rgbData[(y * this.imageWidth + x) * 3]
-                //            green component is in rgbData[(y * this.imageWidth + x) * 3 + 1]
-                //             blue component is in rgbData[(y * this.imageWidth + x) * 3 + 2]
-                //
-                // Each of the red, green and blue components should be a byte, i.e. 0-255
-
 
 		long endTime = System.currentTimeMillis();
 		Long renderTime = endTime - startTime;

@@ -5,6 +5,7 @@ public class Plane implements Surface {
 	public Vector normal;
 	public double offset;
 	public int material_index;
+	public Vector point_on_plane;
 	
 	public Plane(Vector normal, double offset, int material_index)
 	{
@@ -12,14 +13,30 @@ public class Plane implements Surface {
 		this.normal.normalize();
 		this.offset = offset;
 		this.material_index = material_index;
+		
+		if(0 != this.normal.x_cor)
+		{
+			this.point_on_plane = new Vector(-this.offset / this.normal.x_cor, 0, 0);
+		}
+		else if(0 != this.normal.y_cor)
+		{
+			this.point_on_plane = new Vector(0, -this.offset / this.normal.y_cor, 0);
+		}
+		else if(0 != this.normal.z_cor)
+		{
+			this.point_on_plane = new Vector(0, 0, -this.offset / this.normal.z_cor);
+		}
 	}
+	
 	
 	public Vector get_intersection_point_with_surface(Ray r) {
 		if (r.direction.dot(this.normal) == 0) {
 			// The ray and the plane are parallel
 			return null;
 		}
-		double t = - ((r.start.dot((this.normal)) + this.offset)) /
+		Vector tmp = new Vector(this.point_on_plane);
+		tmp.substract(r.start);
+		double t = tmp.dot(this.normal) /
 				(r.direction.dot(this.normal));
 		if (t < 0) {
 			return null;
