@@ -62,6 +62,7 @@ public class Sphere implements Surface{
 	{
 		Vector normal = new Vector(point);
 		normal.substract(this.Center);
+		normal.normalize();
 		return normal;
 	}
 }

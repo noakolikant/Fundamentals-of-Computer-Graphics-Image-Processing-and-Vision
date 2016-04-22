@@ -16,15 +16,15 @@ public class Plane implements Surface {
 		
 		if(0 != this.normal.x_cor)
 		{
-			this.point_on_plane = new Vector(-this.offset / this.normal.x_cor, 0, 0);
+			this.point_on_plane = new Vector(this.offset / this.normal.x_cor, 0, 0);
 		}
 		else if(0 != this.normal.y_cor)
 		{
-			this.point_on_plane = new Vector(0, -this.offset / this.normal.y_cor, 0);
+			this.point_on_plane = new Vector(0, this.offset / this.normal.y_cor, 0);
 		}
 		else if(0 != this.normal.z_cor)
 		{
-			this.point_on_plane = new Vector(0, 0, -this.offset / this.normal.z_cor);
+			this.point_on_plane = new Vector(0, 0, this.offset / this.normal.z_cor);
 		}
 	}
 	
