@@ -118,8 +118,8 @@ public class RayTracer {
 				}
 				else if (code.equals("set"))
 				{
-					this.background_color = new Color(Byte.parseByte(params[0]), 
-							Byte.parseByte(params[1]), Byte.parseByte(params[2]));
+					this.background_color = new Color((int)(255 * Double.parseDouble(params[0])), 
+							(int)(255 * Double.parseDouble(params[1])), (int)(255 *Double.parseDouble(params[2])));
 					this.shadow_rays_num = Integer.parseInt(params[3]);
 					this.max_recursion_level = Integer.parseInt(params[4]);
 
