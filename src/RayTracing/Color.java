@@ -1,18 +1,18 @@
 package RayTracing;
 
 public class Color {
-	public byte red;
-	public byte green;
-	public byte blue;
+	public int red;
+	public int green;
+	public int blue;
 	
 	public Color()
 	{
-		this.red = (byte) 255;
-		this.green = (byte) 255;
-		this.blue = (byte) 255;
+		this.red = (int) 255;
+		this.green = (int) 255;
+		this.blue = (int) 255;
 	}
 	
-	public Color(byte red, byte blue, byte green)
+	public Color(int red, int blue, int green)
 	{
 		this.red = red;
 		this.blue = blue;
