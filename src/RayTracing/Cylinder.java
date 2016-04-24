@@ -12,6 +12,7 @@ public class Cylinder implements Surface {
 	public Vector pivot;
 	public double radius;
 	public int material_index;
+	public double max_length_from_body_to_center;
 
 	public Cylinder (double x, double y, double z, double length, double radius, double x_rotation,
 			double y_rotation, double z_rotation, int material_index)
@@ -36,12 +37,14 @@ public class Cylinder implements Surface {
 		this.bottom_disk_center.substract(vector_delta);
 		this.top_disk_center = new Vector(Center);
 		this.top_disk_center.add(vector_delta);
+		
+		this.max_length_from_body_to_center = Math.pow(Math.pow(this.length/2, 2) + Math.pow(this.radius, 2),  0.5);
 	}
 
 	private Vector get_intersection_point_with_bottom_disk(Ray r)
 	{
-		double offset = -(this.pivot.x_cor * this.bottom_disk_center.x_cor *
-				this.pivot.y_cor * this.bottom_disk_center.y_cor *
+		double offset = (this.pivot.x_cor * this.bottom_disk_center.x_cor +
+				this.pivot.y_cor * this.bottom_disk_center.y_cor +
 				this.pivot.z_cor * this.bottom_disk_center.z_cor);
 		Plane bottom_disk_plane = new Plane(this.pivot, offset, this.material_index);
 		Vector bottom_disk_plabe_intersection_point = bottom_disk_plane.get_intersection_point_with_surface(r);
@@ -59,8 +62,8 @@ public class Cylinder implements Surface {
 
 	private Vector get_intersection_point_with_top_disk(Ray r)
 	{
-		double offset = -(this.pivot.x_cor * this.top_disk_center.x_cor *
-				this.pivot.y_cor * this.top_disk_center.y_cor *
+		double offset = (this.pivot.x_cor * this.top_disk_center.x_cor +
+				this.pivot.y_cor * this.top_disk_center.y_cor +
 				this.pivot.z_cor * this.top_disk_center.z_cor);
 		Plane top_disk_plane = new Plane(this.pivot, offset, this.material_index);
 		Vector top_disk_plabe_intersection_point = top_disk_plane.get_intersection_point_with_surface(r);
@@ -85,11 +88,12 @@ public class Cylinder implements Surface {
 
 		//First, get intersection point with infinite cylinder
 		/* for a ray p0 + vt, and a cylinder (q - pa - (va*(q – pa) ) va)^2 - r^2 = 0, where q is a point
-		 *  (x,y,z) on the cylinder, we solve:
+		 *  (x,y,z) on the cylinder, Va the cylinders direction vector, pa bottom disk center
+		 *   we solve:
 		 *  (p0 - pa + vt - (va * (p - pa + vt))va)^2 - r^2 = 0
 		 *  and get At^2 + Bt + C where
 		 *  A = (v -(v * va )va)^2
-		 *  B = 2((v - (v * va)va) * (delta_p -(delta_p * va)*va))
+		 *  B = 2((v - (v * va)va) * (delta_p -(delta_p * va)va))
 		 *  C = (delta_p -(delta_p * va)va)^2 - r^2
 		 *  and delta_p = p0 -pa 
 		 *  Math taken from http://mrl.nyu.edu/~dzorin/cg05/lecture12.pdf*/
@@ -101,15 +105,17 @@ public class Cylinder implements Surface {
 		Vector v1; // v1 = v -(v * va )va
 		Vector v2; // v2 = delta_p -(delta_p * va)*va
 		Vector va = new Vector(this.pivot);
+		va.normalize();
 		Vector v = new Vector(r.direction);
-
+		v.normalize();
+		
 		v1 = new Vector(v);
-		va.multiplyByScalar(va.dot(v));
+		va.multiplyByScalar(v.dot(va));
 		v1.substract(va);
 
 		va = new Vector(this.pivot);
 		v2 = new Vector(delta_p);
-		va.multiplyByScalar(va.dot(delta_p));
+		va.multiplyByScalar(delta_p.dot(va));
 		v2.substract(va);
 
 		A = v1.lengthSquared();
@@ -124,61 +130,20 @@ public class Cylinder implements Surface {
 
 		double t1 = (- B + Math.pow(Discriminant, 0.5)) / 2 / A;
 		double t2 = (- B - Math.pow(Discriminant, 0.5)) / 2 / A;
+		double min_t = Math.min(t1, t2);
 
-		Vector potential_intersection_point1 = new Vector(r.direction);
-		potential_intersection_point1.multiplyByScalar(t1);
-		potential_intersection_point1.add(r.start);
-
-		Vector potential_intersection_point2 = new Vector(r.direction);
-		potential_intersection_point2.multiplyByScalar(t2);
-		potential_intersection_point2.add(r.start);
-
-		double first_point_dest = 0, second_point_dest = 0;
-		Vector is_inside_cylinder = new Vector(potential_intersection_point1);
-		is_inside_cylinder.substract(this.Center);
-		if(Math.pow(Math.pow(is_inside_cylinder.length(), 2) - Math.pow(this.radius, 2), 0.5)
-				> this.length / 2)
+		Vector potential_intersection_point = new Vector(r.direction);
+		potential_intersection_point.multiplyByScalar(min_t);
+		potential_intersection_point.add(r.start);
+		
+		Vector tmp = new Vector(this.Center);
+		tmp.substract(potential_intersection_point);
+		if(tmp.length() > this.max_length_from_body_to_center)
 		{
-			potential_intersection_point1 = null;
+			return null;
 		}
-		else
-		{
-			first_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
-		}
-
-		is_inside_cylinder = new Vector(potential_intersection_point2);
-		is_inside_cylinder.substract(this.Center);
-		if(Math.pow(Math.pow(is_inside_cylinder.length(), 2) - Math.pow(this.radius, 2), 0.5)
-				> this.length / 2)
-		{
-			potential_intersection_point2 = null;
-		}
-		else
-		{
-			second_point_dest = r.start.destinstion_from_point(potential_intersection_point1);
-		}
-
-		if((potential_intersection_point2 == null) && (potential_intersection_point1 == null))
-		{
-			return null; 
-		}
-		if(potential_intersection_point1 == null)
-		{
-			first_point_dest = second_point_dest + 1; // make it bigger
-		}
-		else if(potential_intersection_point2 == null)
-		{
-			second_point_dest = first_point_dest + 1; // make is bigger
-		}
-
-		if(first_point_dest < second_point_dest)
-		{
-			return potential_intersection_point1;
-		}
-		else
-		{
-			return potential_intersection_point2;
-		}
+		
+		return potential_intersection_point;
 	}
 
 	@Override
@@ -259,7 +224,10 @@ public class Cylinder implements Surface {
 		from_center_to_intersection_point.substract(this.Center);
 		Vector normal;
 
-		double dist_from_center = this.pivot.dot(from_center_to_intersection_point);
+		Vector height_v = new Vector(this.pivot);
+		height_v.multiplyByScalar(this.length/2);
+		
+		double dist_from_center = height_v.dot(from_center_to_intersection_point);
 		if(dist_from_center == this.length / 2) //intersection point is on top disk
 		{
 			normal = new Vector(this.pivot);
@@ -274,10 +242,14 @@ public class Cylinder implements Surface {
 			normal = new Vector(point);
 			normal.substract(this.Center);
 			
-			Vector pivot_vector_part = new Vector(normal);
-			pivot_vector_part.dot(this.pivot);
+			Vector pivot_hegith = new Vector(this.pivot);
+			pivot_hegith.multiplyByScalar(this.length/2);
+			double proj = normal.dot(pivot_hegith)/pivot_hegith.lengthSquared();
 			
-			normal.substract(pivot_vector_part);
+			Vector pivot_direction_vector_to_substract = new Vector(this.pivot);
+			pivot_direction_vector_to_substract.multiplyByScalar(proj);
+			
+			normal.substract(pivot_direction_vector_to_substract);
 		}
 
 		normal.normalize();		

@@ -138,6 +138,7 @@ public class Vector {
 	 */
 	public void multiply_with_Matrix(Matrix M)
 	{
+		Vector result = new Vector(0, 0, 0);
 		double tmp_calc;
 		
 		for(int i = 0; i < 3; i ++)
@@ -146,16 +147,19 @@ public class Vector {
 			switch (i)
 			{
 			case 0:
-				this.x_cor = tmp_calc;
+				result.x_cor = tmp_calc;
 				break;
 			case 1:
-				this.y_cor = tmp_calc;
+				result.y_cor = tmp_calc;
 				break;
 			case 2:
-				this.z_cor = tmp_calc;
+				result.z_cor = tmp_calc;
 				break;
 			}
 		}
+		this.x_cor = result.x_cor;
+		this.y_cor = result.y_cor;
+		this.z_cor = result.z_cor;
 	}
 	/**
 	 * Sets self new Vector after rotation
