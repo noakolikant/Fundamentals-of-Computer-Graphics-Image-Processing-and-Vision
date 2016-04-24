@@ -150,6 +150,17 @@ public class RayTracer {
 
 					System.out.println(String.format("Parsed sphere (line %d)", lineNum));
 				}
+				else if (code.equals("cub"))
+				{	
+					Cube cube = new Cube(Double.parseDouble(params[0]),
+							Double.parseDouble(params[1]), Double.parseDouble(params[2]),
+							Double.parseDouble(params[3]), Double.parseDouble(params[4]),
+							Double.parseDouble(params[5]), Double.parseDouble(params[6]),
+							Integer.parseInt(params[7]));
+					this.surfaces_list.add(cube);
+							
+					System.out.println(String.format("Parsed cube (line %d)", lineNum));
+				}
 				else if (code.equals("pln"))
 				{
 					Plane plane = new Plane(new Vector(Double.parseDouble(params[0]),
@@ -426,17 +437,17 @@ public class RayTracer {
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 		
 		for(int i = 0; i < this.imageWidth; i++)
-		//	for(int i = 0; i < 30; i++)
+		//	for(int i = 250; i < 260; i++)
 		{
 			for(int j = 0; j < this.imageHeight; j++)
-			//	for(int j = 470; j < 500; j++)
+	//			for(int j = 250; j < 260; j++)
 			{
 				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
 				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level);
 				 rgbData[(j * this.imageWidth + i) * 3] = (byte)pixel_color.red;
 				 rgbData[(j * this.imageWidth + i) * 3 + 1] = (byte)pixel_color.green;
 				 rgbData[(j * this.imageWidth + i) * 3 + 2] = (byte)pixel_color.blue;
-				 
+			//	 System.out.println("i = " + i +", j = " + j);
 			}
 		}
 
