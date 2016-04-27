@@ -292,17 +292,19 @@ public class RayTracer {
 		Color diffuse_color = new Color(0, 0, 0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection,
+			Color light = new Color(255, 255, 255);
+			light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
+			light.multiply_with_colorAttribute(material.diffusive_color);
+			Vector direction = new Vector(this.light_sources_list.get(i).position);
+			direction.substract(surface_intersection.intersection);
+			direction.normalize();
+			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
+			if (!this.isLineOfSight(surface_intersection.surface, surface_intersection.intersection,
 					light_sources_list.get(i).position)) {
-				Color light = new Color(255, 255, 255);
-				light.multiply_with_colorAttribute(this.light_sources_list.get(i).color);
-				light.multiply_with_colorAttribute(material.diffusive_color);
-				Vector direction = new Vector(this.light_sources_list.get(i).position);
-				direction.substract(surface_intersection.intersection);
-				direction.normalize();
-				light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
-				diffuse_color.add(light);
+				light.multiply_with_scalar(1-this.light_sources_list.get(i).shadow_intensity);
 			}
+				diffuse_color.add(light);
+			
 		}
 		return diffuse_color;
 	}
