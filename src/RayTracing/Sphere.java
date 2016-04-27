@@ -48,6 +48,7 @@ public class Sphere implements Surface{
 		Vector reflection_direction = new Vector(normal);
 		reflection_direction.multiplyByScalar(2 * normal.dot(incomming_ray.direction));
 		reflection_direction.substract(incomming_ray.direction);
+		reflection_direction.multiplyByScalar(-1);
 		//R = 2 * dot(normal, incomming_ray_vector) - incomming_ray_vector
 		Ray reflection = new Ray(intersection_point, reflection_direction);
 		

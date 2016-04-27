@@ -22,4 +22,8 @@ public class ColorAttribute {
 		this.green = color.green * specular_intensity;
 		this.blue = color.blue * specular_intensity;
 	}
+	
+	public Boolean all_zeros() {
+		return this.red == 0 && this.blue == 0 && this.green == 0;
+	}
 }
