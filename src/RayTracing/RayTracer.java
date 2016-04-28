@@ -296,12 +296,14 @@ public class RayTracer {
 			direction.substract(surface_intersection.intersection);
 			direction.normalize();
 			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
-			// TODO: handle soft shadows
+			// handle soft shadows
 			int hits = 0;
 			Vector u = new Vector(this.camera.up_vector);
 			u.cross(direction);
+			u.normalize();
 			Vector w = new Vector(direction);
 			w.cross(u);
+			w.normalize();
 			u.multiplyByScalar(this.light_sources_list.get(i).light_radius);
 			w.multiplyByScalar(this.light_sources_list.get(i).light_radius);
 			Vector u_step = new Vector(u);
@@ -337,6 +339,7 @@ public class RayTracer {
 				diffuse_color.add(light);
 			
 		}
+		diffuse_color.normalize_color();
 		return diffuse_color;
 	}
 	
@@ -364,6 +367,7 @@ public class RayTracer {
 				specular_color.add(light);
 			}
 		}
+		specular_color.normalize_color();
 		return specular_color;
 	}
 	
@@ -442,7 +446,7 @@ public class RayTracer {
 			Color specular_color = this.get_specular_color(surface_intersection, ray.direction);
 			
 			Color non_recursive_color = new Color(diffusive_color);
-			non_recursive_color.add(specular_color);
+			//non_recursive_color.add(specular_color);
 			non_recursive_color.multiply_with_scalar(1 - material_transperncy);
 			Color result = new Color(non_recursive_color);
 			
@@ -450,16 +454,16 @@ public class RayTracer {
 				Ray reflection_ray = surface_intersection.surface.get_reflection_ray(surface_intersection.intersection, ray);
 				Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1, surface_intersection.surface);
 				reflection_color.multiply_with_colorAttribute(material_reflection_color);
-				result.add(reflection_color);
+				//result.add(reflection_color);
 			}
 			
 			if (material_transperncy != 0) {
 				Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 				Color transparent_color = this.calcPixelColor(transparent_ray, recusion_level-1, surface_intersection.surface);
 				transparent_color.multiply_with_scalar(material_transperncy);
-				result.add(transparent_color);
+				//result.add(transparent_color);
 			}
-			
+			result.normalize_color();
 			return result;
 		}
 		
