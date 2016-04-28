@@ -53,12 +53,12 @@ public class Plane implements Surface {
 	public Ray get_reflection_ray(Vector intersection_point, Ray incomming_ray) 
 	{
 		// R = incomming_ray_vector - 2(<incomming_ray_vector,n>)n
-		// note - Are you sure? Look at this http://www.3dkingdoms.com/weekly/weekly.php?a=2 our incoming vector is the other way around
 		Vector normal = new Vector(this.normal);
 		normal.normalize(); // normalize the normal
 		normal.multiplyByScalar(2 * (normal.dot(incomming_ray.direction)));
 		Vector reflection_direction = new Vector(incomming_ray.direction);
 		reflection_direction.substract(normal);
+		reflection_direction.multiplyByScalar(-1);
 		Ray reflection = new Ray(intersection_point, reflection_direction);
 		return reflection;
 	}
