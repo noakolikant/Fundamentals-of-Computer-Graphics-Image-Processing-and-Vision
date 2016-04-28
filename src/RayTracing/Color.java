@@ -45,4 +45,10 @@ public class Color {
 		this.blue *= scalar;
 		this.green *= scalar;
 	}
+	
+	public void normalize_color() {
+		this.red = this.red <= 255 ? this.red : 255;
+		this.blue = this.blue <= 255 ? this.blue : 255;
+		this.green = this.green <= 255 ? this.green : 255;
+	}
 }
