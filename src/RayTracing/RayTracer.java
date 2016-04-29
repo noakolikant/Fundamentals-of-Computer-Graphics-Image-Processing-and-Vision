@@ -344,7 +344,8 @@ public class RayTracer {
 				light.multiply_with_scalar(1-this.light_sources_list.get(i).shadow_intensity);
 			}
 			else {
-				light.multiply_with_scalar(hits / (this.shadow_rays_num * this.shadow_rays_num));
+				double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
+				light.multiply_with_scalar(fraction);
 			}
 				diffuse_color.add(light);
 			
@@ -357,6 +358,7 @@ public class RayTracer {
 		Color specular_color = new Color(0, 0, 0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
+			// TODO: fix it
 			if (true || this.isLineOfSight(null, surface_intersection.intersection, 
 					light_sources_list.get(i).position)) 
 			{
