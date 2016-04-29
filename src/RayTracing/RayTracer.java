@@ -259,6 +259,32 @@ public class RayTracer {
 		return null;
 	}
 	
+	private double get_accumaltive_transperncy(Surface surface, Vector start_point, Vector end_point) {
+		double transperncy = 1;
+		Vector direction = new Vector(end_point);
+		Vector start_point_copy = new Vector(start_point);
+		direction.substract(start_point_copy);
+		Vector epsilon = new Vector(direction);
+		epsilon.normalize();
+		epsilon.multiplyByScalar(0.001);
+		start_point_copy.add(epsilon);
+		Ray ray = new Ray(start_point_copy, direction);
+		
+		Vector potential_intersection_point = null;
+		/* Iterating all surfaces to find closest intersection point*/
+		for(int i = 0; i < this.surfaces_list.size(); i++)
+		{
+			if (surface == this.surfaces_list.get(i)) {
+				continue;
+			}
+			potential_intersection_point = this.surfaces_list.get(i).get_intersection_point_with_surface(ray);
+			if (null != potential_intersection_point) {
+				transperncy *= this.materials_list.get(this.surfaces_list.get(i).get_material_index() - 1).transperacy;
+			}
+		}
+		return transperncy;		
+	}
+	
 	private LightSourceIntersection find_closest_intersection_with_light_source(Ray ray) {
 		double min_dest_from_light_source = 0;
 		LightSource intersection_light_source = null;
@@ -325,8 +351,8 @@ public class RayTracer {
 					hits++;
 				}
 				else {
-					Material material = this.materials_list.get(closer_surface.get_material_index() - 1);
-					hits += material.transperacy;
+					double transperacy = get_accumaltive_transperncy(null, surface_intersection.intersection, top_left_corner);
+					hits += (transperacy * (1 - light_source.shadow_intensity));
 				}
 				top_left_corner.substract(random_u_step);
 				top_left_corner.substract(random_w_step);
@@ -350,15 +376,9 @@ public class RayTracer {
 			direction.normalize();
 			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
 			double hits = this.get_light_hits(surface_intersection, direction,  this.light_sources_list.get(i));
-			
-			if (hits == 0) {
-				light.multiply_with_scalar(1-this.light_sources_list.get(i).shadow_intensity);
-			}
-			else {
-				double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
-				light.multiply_with_scalar(fraction);
-			}
-				diffuse_color.add(light);
+			double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
+			light.multiply_with_scalar(fraction);
+			diffuse_color.add(light);
 			
 		}
 		diffuse_color.normalize_color();
@@ -385,14 +405,8 @@ public class RayTracer {
 			l.normalize();
 			light.multiply_with_scalar(Math.pow(r.direction.dot(l), material.phong_specularity));
 			double hits = this.get_light_hits(surface_intersection, direction,  this.light_sources_list.get(i));
-			if (hits == 0) 
-			{
-				light.multiply_with_scalar(1-this.light_sources_list.get(i).shadow_intensity);
-			}
-			else {
-				double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
-				light.multiply_with_scalar(fraction);
-			}
+			double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
+			light.multiply_with_scalar(fraction);
 			specular_color.add(light);
 		}
 		specular_color.normalize_color();
