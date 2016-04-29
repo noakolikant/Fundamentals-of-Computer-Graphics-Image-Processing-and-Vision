@@ -297,6 +297,7 @@ public class RayTracer {
 			direction.normalize();
 			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
 			// handle soft shadows
+			// TODO: random
 			int hits = 0;
 			Vector u = new Vector(this.camera.up_vector);
 			u.cross(direction);
@@ -347,7 +348,7 @@ public class RayTracer {
 		Color specular_color = new Color(0, 0, 0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
-			if (this.isLineOfSight(null, surface_intersection.intersection, 
+			if (true || this.isLineOfSight(null, surface_intersection.intersection, 
 					light_sources_list.get(i).position)) 
 			{
 				Color light = new Color(255, 255, 255);
@@ -363,7 +364,12 @@ public class RayTracer {
 				r.direction.multiplyByScalar(-1);
 				Vector l = new Vector(eye_direction);
 				l.normalize();
-				light.multiply_with_scalar(Math.pow(r.direction.dot(l), material.phong_specularity));				
+				light.multiply_with_scalar(Math.pow(r.direction.dot(l), material.phong_specularity));
+				if (!this.isLineOfSight(null, surface_intersection.intersection, 
+					light_sources_list.get(i).position)) 
+				{
+					light.multiply_with_scalar(1-this.light_sources_list.get(i).shadow_intensity);
+				}
 				specular_color.add(light);
 			}
 		}
@@ -446,7 +452,7 @@ public class RayTracer {
 			Color specular_color = this.get_specular_color(surface_intersection, ray.direction);
 			
 			Color non_recursive_color = new Color(diffusive_color);
-			//non_recursive_color.add(specular_color);
+			non_recursive_color.add(specular_color);
 			non_recursive_color.multiply_with_scalar(1 - material_transperncy);
 			Color result = new Color(non_recursive_color);
 			
@@ -454,14 +460,14 @@ public class RayTracer {
 				Ray reflection_ray = surface_intersection.surface.get_reflection_ray(surface_intersection.intersection, ray);
 				Color reflection_color = this.calcPixelColor(reflection_ray, recusion_level-1, surface_intersection.surface);
 				reflection_color.multiply_with_colorAttribute(material_reflection_color);
-				//result.add(reflection_color);
+				result.add(reflection_color);
 			}
 			
 			if (material_transperncy != 0) {
 				Ray transparent_ray = new Ray(intersection_point_with_surface, ray.direction);
 				Color transparent_color = this.calcPixelColor(transparent_ray, recusion_level-1, surface_intersection.surface);
 				transparent_color.multiply_with_scalar(material_transperncy);
-				//result.add(transparent_color);
+				result.add(transparent_color);
 			}
 			result.normalize_color();
 			return result;
