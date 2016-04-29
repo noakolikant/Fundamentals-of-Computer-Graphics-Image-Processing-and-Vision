@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -297,7 +298,6 @@ public class RayTracer {
 			direction.normalize();
 			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
 			// handle soft shadows
-			// TODO: random
 			int hits = 0;
 			Vector u = new Vector(this.camera.up_vector);
 			u.cross(direction);
@@ -319,12 +319,21 @@ public class RayTracer {
 			w.multiplyByScalar(0.5);
 			top_left_corner.add(w);
 			w.multiplyByScalar(2);
+			Random rnd = new Random();
 			for (int j = 0; j < this.shadow_rays_num; j++) {
 				for (int k = 0; k < this.shadow_rays_num; k++) {
+					Vector random_u_step = new Vector(u_step);
+					Vector random_w_step = new Vector(w_step);
+					random_u_step.multiplyByScalar(rnd.nextDouble());
+					random_w_step.multiplyByScalar(rnd.nextDouble());
+					top_left_corner.add(random_u_step);
+					top_left_corner.add(random_w_step);
 					if (this.isLineOfSight(null, surface_intersection.intersection,
 							top_left_corner)) {
 						hits++;
 					}
+					top_left_corner.substract(random_u_step);
+					top_left_corner.substract(random_w_step);
 					top_left_corner.add(w_step);
 				}
 				top_left_corner.add(u_step);
