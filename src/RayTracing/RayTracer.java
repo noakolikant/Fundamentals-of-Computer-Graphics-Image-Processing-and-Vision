@@ -257,10 +257,8 @@ public class RayTracer {
 		
 		if (null != surface_intersection) {
 			double dist_closer_intersection_from_light;
-			Vector temp = new Vector(end_point);
-			temp.substract(surface_intersection.intersection);
-			dist_closer_intersection_from_light = temp.length();
-			if (dist_closer_intersection_from_light < distance) {
+			if(surface_intersection.distance < distance)
+			{
 				return surface_intersection.surface;
 			}
 		}
