@@ -5,6 +5,8 @@ public class Cylinder implements Surface {
 	/* note - Cylinder is represented as two disks and pivot to make it easier to get
 	 *  intersection point with rays later
 	 */
+	public Plane top_disk_plane;
+	public Plane bottom_disk_plane;
 	public Vector bottom_disk_center;
 	public Vector top_disk_center;
 	public Vector Center;
@@ -39,22 +41,32 @@ public class Cylinder implements Surface {
 		this.top_disk_center.add(vector_delta);
 		
 		this.max_length_from_body_to_center = Math.pow(Math.pow(this.length/2, 2) + Math.pow(this.radius, 2),  0.5);
+		
+		double offset = (this.pivot.x_cor * this.top_disk_center.x_cor +
+				this.pivot.y_cor * this.top_disk_center.y_cor +
+				this.pivot.z_cor * this.top_disk_center.z_cor);
+		this.top_disk_plane = new Plane(this.pivot, offset, this.material_index);
+		
+		Vector normal_vector = new Vector(this.pivot);
+		normal_vector.multiplyByScalar(-1);
+		
+		offset = (normal_vector.x_cor * this.bottom_disk_center.x_cor +
+				normal_vector.y_cor * this.bottom_disk_center.y_cor +
+				normal_vector.z_cor * this.bottom_disk_center.z_cor);
+
+		this.bottom_disk_plane = new Plane(normal_vector, offset, this.material_index);
 	}
 
 	private Vector get_intersection_point_with_bottom_disk(Ray r)
 	{
-		double offset = (this.pivot.x_cor * this.bottom_disk_center.x_cor +
-				this.pivot.y_cor * this.bottom_disk_center.y_cor +
-				this.pivot.z_cor * this.bottom_disk_center.z_cor);
-		Plane bottom_disk_plane = new Plane(this.pivot, offset, this.material_index);
-		Vector bottom_disk_plabe_intersection_point = bottom_disk_plane.get_intersection_point_with_surface(r);
-		if(null != bottom_disk_plabe_intersection_point)
+		Vector bottom_disk_plane_intersection_point = this.bottom_disk_plane.get_intersection_point_with_surface(r);
+		if(null != bottom_disk_plane_intersection_point)
 		{
-			Vector delata_intersection_point_disk_center = new Vector(bottom_disk_plabe_intersection_point);
+			Vector delata_intersection_point_disk_center = new Vector(bottom_disk_plane_intersection_point);
 			delata_intersection_point_disk_center.substract(this.bottom_disk_center);
 			if(delata_intersection_point_disk_center.length() <= this.radius)
 			{
-				return bottom_disk_plabe_intersection_point;
+				return bottom_disk_plane_intersection_point;
 			}
 		}
 		return null;
@@ -62,11 +74,7 @@ public class Cylinder implements Surface {
 
 	private Vector get_intersection_point_with_top_disk(Ray r)
 	{
-		double offset = (this.pivot.x_cor * this.top_disk_center.x_cor +
-				this.pivot.y_cor * this.top_disk_center.y_cor +
-				this.pivot.z_cor * this.top_disk_center.z_cor);
-		Plane top_disk_plane = new Plane(this.pivot, offset, this.material_index);
-		Vector top_disk_plabe_intersection_point = top_disk_plane.get_intersection_point_with_surface(r);
+		Vector top_disk_plabe_intersection_point = this.top_disk_plane.get_intersection_point_with_surface(r);
 		if(null != top_disk_plabe_intersection_point)
 		{
 			Vector delata_intersection_point_disk_center = new Vector(top_disk_plabe_intersection_point);
@@ -123,17 +131,33 @@ public class Cylinder implements Surface {
 		C = v2.lengthSquared() - Math.pow(this.radius, 2);
 
 		double Discriminant = Math.pow(B, 2) - 4 * A * C;
-		if(0 > Discriminant)
+		if((0 > Discriminant) || (0 == A))
 		{
 			return null;
 		}
 
+		double chosen_t = 0;
 		double t1 = (- B + Math.pow(Discriminant, 0.5)) / 2 / A;
 		double t2 = (- B - Math.pow(Discriminant, 0.5)) / 2 / A;
-		double min_t = Math.min(t1, t2);
-
+		if((t1 < 0) && (t2 < 0))
+		{
+			return null;
+		}
+		else if((t1 < 0) && (t2 > 0))
+		{
+			chosen_t = t2;
+		}
+		else if((t1 > 0) && (t2 < 0))
+		{
+			chosen_t = t1;
+		}
+		else if((t1 > 0) && (t2 > 0))
+		{
+			chosen_t = Math.min(t1, t2);
+		}
+		
 		Vector potential_intersection_point = new Vector(r.direction);
-		potential_intersection_point.multiplyByScalar(min_t);
+		potential_intersection_point.multiplyByScalar(chosen_t);
 		potential_intersection_point.add(r.start);
 		
 		Vector tmp = new Vector(this.Center);
@@ -222,32 +246,50 @@ public class Cylinder implements Surface {
 		//from_center_to_intersection_point - points from the cylinder center to the intersection point
 		Vector from_center_to_intersection_point = new Vector(point);
 		from_center_to_intersection_point.substract(this.Center);
+
 		Vector normal;
 
+		if(Math.abs(this.bottom_disk_plane.normal.x_cor * point.x_cor +
+				this.bottom_disk_plane.normal.y_cor * point.y_cor +
+				this.bottom_disk_plane.normal.z_cor * point.z_cor - this.bottom_disk_plane.offset) < 0.0001)
+		{
+			normal = new Vector(this.bottom_disk_plane.normal);
+		}
+		else if(Math.abs(this.top_disk_plane.normal.x_cor * point.x_cor +
+				this.top_disk_plane.normal.y_cor * point.y_cor +
+				this.top_disk_plane.normal.z_cor * point.z_cor - this.top_disk_plane.offset) < 0.0001)
+		{
+			normal = new Vector(this.top_disk_plane.normal);
+		}
+		
+		
+/*
 		Vector height_v = new Vector(this.pivot);
+		height_v.normalize();
 		height_v.multiplyByScalar(this.length/2);
 		
 		double dist_from_center = height_v.dot(from_center_to_intersection_point);
-		if(dist_from_center == this.length / 2) //intersection point is on top disk
+		if(Math.abs(dist_from_center - this.length / 2) < 0.0001) //intersection point is on top disk
 		{
 			normal = new Vector(this.pivot);
 		}
-		else if(dist_from_center == -this.length / 2) //intersection point is on bottom disk
+		else if(Math.abs(dist_from_center + this.length / 2) < 0.0001) //intersection point is on bottom disk
 		{
 			normal = new Vector(this.pivot);
 			normal.multiplyByScalar(-1);
-		}
+		}*/
 		else //intersection point is on the cylinder body
 		{
 			normal = new Vector(point);
 			normal.substract(this.Center);
 			
 			Vector pivot_hegith = new Vector(this.pivot);
+			pivot_hegith.normalize();
 			pivot_hegith.multiplyByScalar(this.length/2);
-			double proj = normal.dot(pivot_hegith)/pivot_hegith.lengthSquared();
+			double proj_on_pivot = normal.dot(pivot_hegith);
 			
 			Vector pivot_direction_vector_to_substract = new Vector(this.pivot);
-			pivot_direction_vector_to_substract.multiplyByScalar(proj);
+			pivot_direction_vector_to_substract.multiplyByScalar(proj_on_pivot);
 			
 			normal.substract(pivot_direction_vector_to_substract);
 		}
