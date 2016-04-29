@@ -276,7 +276,7 @@ public class RayTracer {
 		epsilon.normalize();
 		epsilon.multiplyByScalar(0.001);
 		start_point_copy.add(epsilon);
-		Ray ray = new Ray(start_point_copy, direction);
+		Ray ray = new Ray(start_point_copy, new Vector(direction));
 		
 		Vector potential_intersection_point = null;
 		/* Iterating all surfaces to find closest intersection point*/
