@@ -250,9 +250,17 @@ public class RayTracer {
 		start_point_copy.add(epsilon);
 		Ray ray = new Ray(start_point_copy, direction);
 		SurfaceIntersection surface_intersection = this.find_closest_intersection_with_surface(ray, surface);
+		
+		direction = new Vector(end_point);
+		direction.substract(start_point_copy);
 		double distance = direction.length(); 
+		
 		if (null != surface_intersection) {
-			if (surface_intersection.distance < distance) {
+			double dist_closer_intersection_from_light;
+			Vector temp = new Vector(end_point);
+			temp.substract(surface_intersection.intersection);
+			dist_closer_intersection_from_light = temp.length();
+			if (dist_closer_intersection_from_light < distance) {
 				return surface_intersection.surface;
 			}
 		}
@@ -523,10 +531,10 @@ public class RayTracer {
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 		
 		for(int i = 0; i < this.imageWidth; i++)
-		//for(int i = 250; i < 260; i++)
+		//for(int i = 350; i < 360; i++)
 		{
 			for(int j = 0; j < this.imageHeight; j++)
-				//for(int j = 215; j < 230; j++)
+			//	for(int j = 410; j < 420; j++)
 			{
 				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
 				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level, null);

@@ -58,7 +58,7 @@ public class Vector {
 	 * @return Length of this vector
 	 */
 	public double length() {
-		return Math.sqrt(lengthSquared());
+		return Math.sqrt(this.lengthSquared());
 	}
 	
 	/**
