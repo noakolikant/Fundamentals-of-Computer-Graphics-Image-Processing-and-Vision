@@ -352,7 +352,7 @@ public class RayTracer {
 				}
 				else {
 					double transperacy = get_accumaltive_transperncy(null, surface_intersection.intersection, top_left_corner);
-					hits += (transperacy * (1 - light_source.shadow_intensity));
+					hits += (transperacy);
 				}
 				top_left_corner.substract(random_u_step);
 				top_left_corner.substract(random_w_step);
@@ -361,6 +361,8 @@ public class RayTracer {
 			top_left_corner.add(u_step);
 			top_left_corner.substract(w);
 		}
+		double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
+		hits = (fraction * light_source.shadow_intensity) + (1-light_source.shadow_intensity);
 		return hits;
 	}
 	
@@ -376,8 +378,7 @@ public class RayTracer {
 			direction.normalize();
 			light.multiply_with_scalar(Math.abs(surface_intersection.surface.get_normal_direction(surface_intersection.intersection).dot(direction)));
 			double hits = this.get_light_hits(surface_intersection, direction,  this.light_sources_list.get(i));
-			double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
-			light.multiply_with_scalar(fraction);
+			light.multiply_with_scalar(hits);
 			diffuse_color.add(light);
 			
 		}
@@ -405,8 +406,7 @@ public class RayTracer {
 			l.normalize();
 			light.multiply_with_scalar(Math.pow(r.direction.dot(l), material.phong_specularity));
 			double hits = this.get_light_hits(surface_intersection, direction,  this.light_sources_list.get(i));
-			double fraction = (double)hits / (this.shadow_rays_num * this.shadow_rays_num);
-			light.multiply_with_scalar(fraction);
+			light.multiply_with_scalar(hits);
 			specular_color.add(light);
 		}
 		specular_color.normalize_color();
