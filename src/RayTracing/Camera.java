@@ -15,6 +15,7 @@ public class Camera {
 		// find the direction vector
 		this.direction = new Vector(this.look_at_point); // copy the vector
 		this.direction.substract(position);
+		this.direction.normalize();
 		// fix the up vector to be perpendicular to the direction
 		this.up_vector = new Vector(up_vector);
 		Vector temp = new Vector(this.direction); // copy this vector
