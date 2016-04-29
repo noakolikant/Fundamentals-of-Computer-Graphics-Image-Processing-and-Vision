@@ -287,6 +287,7 @@ public class RayTracer {
 	}
 	
 	private Color get_diffuse_color(SurfaceIntersection surface_intersection) {
+		Random rnd = new Random();
 		Color diffuse_color = new Color(0, 0, 0);
 		Material material = this.materials_list.get(surface_intersection.surface.get_material_index() - 1);
 		for (int i = 0; i < this.light_sources_list.size(); i++) {
@@ -305,21 +306,21 @@ public class RayTracer {
 			Vector w = new Vector(direction);
 			w.cross(u);
 			w.normalize();
+			assert w.dot(u) == w.dot(direction) && w.dot(u) == u.dot(direction) && w.dot(u) == 0;
 			u.multiplyByScalar(this.light_sources_list.get(i).light_radius);
 			w.multiplyByScalar(this.light_sources_list.get(i).light_radius);
 			Vector u_step = new Vector(u);
-			u_step.multiplyByScalar(1 / this.shadow_rays_num);
+			u_step.multiplyByScalar(1 / (double) this.shadow_rays_num);
 			Vector w_step = new Vector(w);
-			w_step.multiplyByScalar(1 / this.shadow_rays_num);
+			w_step.multiplyByScalar(1 / (double) this.shadow_rays_num);
 			Vector light_source_position = this.light_sources_list.get(i).position;
 			Vector top_left_corner = new Vector(light_source_position);
 			u.multiplyByScalar(0.5);
 			top_left_corner.substract(u);
 			u.multiplyByScalar(2);
 			w.multiplyByScalar(0.5);
-			top_left_corner.add(w);
+			top_left_corner.substract(w);
 			w.multiplyByScalar(2);
-			Random rnd = new Random();
 			for (int j = 0; j < this.shadow_rays_num; j++) {
 				for (int k = 0; k < this.shadow_rays_num; k++) {
 					Vector random_u_step = new Vector(u_step);
