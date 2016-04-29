@@ -407,10 +407,18 @@ public class RayTracer {
 			Ray r = surface_intersection.surface.get_reflection_ray(surface_intersection.intersection, 
 					new Ray(this.light_sources_list.get(i).position, direction));
 			r.direction.normalize();
-			r.direction.multiplyByScalar(-1);
+			if (surface_intersection.surface.getClass() == Plane.class) {
+				// TODO: change it
+				r.direction.multiplyByScalar(-1);
+			}
 			Vector l = new Vector(eye_direction);
 			l.normalize();
-			light.multiply_with_scalar(Math.pow(Math.abs(r.direction.dot(l)), material.phong_specularity));
+			double angle = r.direction.dot(l);
+			if (angle < 0) {
+				// there isn't LOS
+				light.multiply_with_scalar(0);
+			}
+			light.multiply_with_scalar(Math.pow(Math.abs(angle), material.phong_specularity));
 			double hits = this.get_light_hits(surface_intersection, direction,  this.light_sources_list.get(i));
 			light.multiply_with_scalar(hits);
 			specular_color.add(light);
@@ -543,10 +551,10 @@ public class RayTracer {
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 		
 		for(int i = 0; i < this.imageWidth; i++)
-		//for(int i = 430; i < 440; i++)
+		//for(int i = 280; i < 300; i++)
 		{
 			for(int j = 0; j < this.imageHeight; j++)
-			//for(int j = 135; j < 145; j++)
+			//for(int j = 135; j < 150; j++)
 			{
 				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
 				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level, null);
