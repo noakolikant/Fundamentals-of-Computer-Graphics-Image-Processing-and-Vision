@@ -15,6 +15,12 @@ public class Sphere implements Surface{
 	/*  implemented as explained in presentation */
 	public Vector get_intersection_point_with_surface(Ray r)
 	{
+		// if the ray starts in the sphere, it shouldn't intersect with it again
+		Vector start_length = new Vector(r.start);
+		start_length.substract(this.Center);
+		if (start_length.length() < this.radius - (this.radius / 100)) {
+			return null;
+		}
 		Vector L_vector = new Vector(this.Center);
 		L_vector.substract(r.start); // L = O - P0
 		double t_ca = r.direction.dot(L_vector); //t_ca = dot(L, V)
@@ -36,6 +42,7 @@ public class Sphere implements Surface{
 		Vector intersection_point = new Vector(r.direction);
 		intersection_point.multiplyByScalar(t);
 		intersection_point.add(r.start);
+		
 		return intersection_point;
 	}
 

@@ -551,10 +551,10 @@ public class RayTracer {
 		byte[] rgbData = new byte[this.imageWidth * this.imageHeight * 3];
 		
 		for(int i = 0; i < this.imageWidth; i++)
-		//for(int i = 280; i < 300; i++)
+		//for(int i = 360; i < 380; i++)
 		{
 			for(int j = 0; j < this.imageHeight; j++)
-			//for(int j = 135; j < 150; j++)
+		//	for(int j = 220; j < 240; j++)
 			{
 				 initial_ray = ConstructRayThroughPixel(camera, i, j); 
 				 pixel_color = calcPixelColor(initial_ray, this.max_recursion_level, null);
