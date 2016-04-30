@@ -285,7 +285,6 @@ public class Cylinder implements Surface {
 			
 			Vector pivot_hegith = new Vector(this.pivot);
 			pivot_hegith.normalize();
-			pivot_hegith.multiplyByScalar(this.length/2);
 			double proj_on_pivot = normal.dot(pivot_hegith);
 			
 			Vector pivot_direction_vector_to_substract = new Vector(this.pivot);
