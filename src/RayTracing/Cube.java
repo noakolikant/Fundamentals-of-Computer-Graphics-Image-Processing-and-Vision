@@ -23,18 +23,19 @@ public class Cube implements Surface {
 		
 		List<Vector> sides_vectors = new ArrayList<Vector>();
 		List<Double> offsets = new ArrayList<Double>();
+		
 		Vector v;
 		v = new Vector(0, 0, 1);
 		sides_vectors.add(v);
-		v = new Vector(0, 0, 1);
+		v = new Vector(0, 0, -1);
 		sides_vectors.add(v);
 		v = new Vector(1, 0, 0);
 		sides_vectors.add(v);
-		v = new Vector(1, 0, 0);
+		v = new Vector(-1, 0, 0);
 		sides_vectors.add(v);
 		v = new Vector(0, 1, 0);
 		sides_vectors.add(v);
-		v = new Vector(0, 1, 0);
+		v = new Vector(0, -1, 0);
 		sides_vectors.add(v);
 		
 		this.new_x_axis = new Vector(1, 0, 0);
@@ -54,31 +55,23 @@ public class Cube implements Surface {
 		this.new_z_axis.rotate_vector('z', z_rotation);
 		
 		for(int i = 0; i < sides_vectors.size(); i++)
-		{
+		{	
 			sides_vectors.get(i).rotate_vector('x', x_rotation);
 			sides_vectors.get(i).rotate_vector('y', y_rotation);
 			sides_vectors.get(i).rotate_vector('z', z_rotation);
-			double offset = sides_vectors.get(i).x_cor * this.center.x_cor+
-					sides_vectors.get(i).y_cor * this.center.y_cor +
-					sides_vectors.get(i).z_cor * this.center.z_cor;
+			
+			Vector point_on_plane = new Vector(sides_vectors.get(i));
+			point_on_plane.multiplyByScalar(this.length / 2);
+			point_on_plane.add(this.center);
+			
+			double offset = sides_vectors.get(i).x_cor * point_on_plane.x_cor+
+					sides_vectors.get(i).y_cor * point_on_plane.y_cor +
+					sides_vectors.get(i).z_cor * point_on_plane.z_cor;
 			offsets.add(offset);
+			
+			Plane p = new Plane(sides_vectors.get(i), offset, this.material_index);
+			this.sides.add(p);
 		}
-		
-		Plane p;
-		p = new Plane(sides_vectors.get(0), offsets.get(0) + this.length / 2, this.material_index);
-		this.sides.add(p);
-		p = new Plane(sides_vectors.get(1), offsets.get(1) - this.length / 2, this.material_index);
-		this.sides.add(p);
-		
-		p = new Plane(sides_vectors.get(2), offsets.get(2) + this.length / 2, this.material_index);
-		this.sides.add(p);
-		p = new Plane(sides_vectors.get(3), offsets.get(3) - this.length / 2, this.material_index);
-		this.sides.add(p);
-		
-		p = new Plane(sides_vectors.get(4), offsets.get(4) + this.length / 2, this.material_index);
-		this.sides.add(p);
-		p = new Plane(sides_vectors.get(5), offsets.get(5) - this.length / 2, this.material_index);
-		this.sides.add(p);
 	}
 	
 	@Override
@@ -144,7 +137,7 @@ public class Cube implements Surface {
 					this.sides.get(i).normal.z_cor * point.z_cor;
 			if(Math.abs(tmp - this.sides.get(i).offset) < 0.001)
 			{
-				return this.sides.get(0).normal;
+				return this.sides.get(i).normal;
 			}
 		}
 		return null;
