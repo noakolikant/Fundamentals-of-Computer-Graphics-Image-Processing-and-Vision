@@ -28,10 +28,27 @@ function [ H ] = DLT( matches )
     lhs_t_scale = [lhs_scale_factor 0 0; 0 lhs_scale_factor 0; 0 0 1];
     
     rhs_hom_point = rhs_t_scale * rhs_hom_point;
-    lhs_hom_point = lhs_t_scale * lhs_hom_point;    
+    lhs_hom_point = lhs_t_scale * lhs_hom_point;
+    rhs_T = rhs_t_scale * rhs_t_translate;
+    lhs_T = lhs_t_scale * lhs_t_translate;
     
+    % Compute Ai
+    A = [];
+    x_lhs = lhs_hom_point(1,:);
+    y_lhs = lhs_hom_point(2,:);
+    w_lhs = lhs_hom_point(3,:);
+    for i=1:size(rhs_hom_point,2)
+        A = [A; ...
+            zeros(3,1)', -w_lhs(i)*rhs_hom_point(:,i)', ...
+            y_lhs(i)*rhs_hom_point(:,i)';  ...
+            w_lhs(i)*rhs_hom_point(:,i)', zeros(3,1)', ...
+            -x_lhs(i)*rhs_hom_point(:,i)'];
+    end
     
+    [U, D, V] = svd(A);
     
+    h = reshape(V(:,9),3,3)';
+    H = inv(lhs_T) * h * rhs_T;    
 
 end
 
