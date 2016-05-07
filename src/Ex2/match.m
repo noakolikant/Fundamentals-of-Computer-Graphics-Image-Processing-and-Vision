@@ -23,7 +23,6 @@ function [ num_matches,matches,dist_vals ] = match(image1, image2, distRatio)
        end
     end
     num_matches = sum(matches_indexes > 0);
-    cols1 = size(im1,2);
     matches = zeros(num_matches, 4);
     dist_vals = zeros(num_matches, 1);
     k = 1;
@@ -31,28 +30,11 @@ function [ num_matches,matches,dist_vals ] = match(image1, image2, distRatio)
         j = matches_indexes(i);
         if (j > 0)
             matches(k, :) = [loc1(i,1), loc1(i,2), loc2(j, 1),...
-                loc2(j,2)+cols1];
+                loc2(j,2)];
             dist_vals(k) = all_dist_vals(i);
             k = k +1;
         end
     end
-
-%     % Create a new image showing the two images side by side.
-%     im3 = appendimages(im1,im2);
-% 
-%     % Show a figure with lines joining the accepted matches.
-%     figure('Position', [100 100 size(im3,2) size(im3,1)]);
-%     colormap('gray');
-%     imagesc(im3);
-%     hold on;
-%     cols1 = size(im1,2);
-%     for i = 1: size(des1,1)
-%       if (matches(i) > 0)
-%         line([loc1(i,2) loc2(matches(i),2)+cols1], ...
-%              [loc1(i,1) loc2(matches(i),1)], 'Color', 'c');
-%       end
-%     end
-%     hold off;
   
 end
 
