@@ -53,7 +53,6 @@ function [ num_matches,matches,dist_vals ] = match(image1, image2, distRatio)
 %       end
 %     end
 %     hold off;
-%     num_matches = sum(matches > 0);
-%     fprintf('Found %d matches.\n', num_matches);    
+  
 end
 
