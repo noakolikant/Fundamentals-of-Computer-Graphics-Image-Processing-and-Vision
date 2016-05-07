@@ -24,7 +24,6 @@ dist_vals, x)
     for i = 1: x
         plot(matches_sorted(i,2), matches_sorted(i,1),'ro')
         plot(matches_sorted(i, 4)+cols1, matches_sorted(i,3),'ro')
-        % line([loc1(i,2) loc2(matches(i),2)+cols1], [loc1(i,1) loc2(matches(i),1)], 'Color', 'c');
     end
     hold off;
 
