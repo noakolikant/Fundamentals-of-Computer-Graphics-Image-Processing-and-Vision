@@ -47,8 +47,9 @@ function [ H ] = DLT( matches )
     
     [U, D, V] = svd(A);
     
-    h = reshape(V(:,9),3,3)';
+    h = reshape(V(:,9),3,3);
     H = inv(lhs_T) * h * rhs_T;
+    H = H';
 
 end
 
