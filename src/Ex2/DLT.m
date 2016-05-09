@@ -27,6 +27,6 @@ function [ H ] = DLT( matches )
     h = reshape(V(:,9),3,3);
     H = inv(lhs_T) * h * rhs_T;
     H = H';
-
+    
 end
 
