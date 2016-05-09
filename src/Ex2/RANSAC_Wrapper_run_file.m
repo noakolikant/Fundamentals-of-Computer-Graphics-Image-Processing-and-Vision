@@ -1,8 +1,8 @@
 
 fittingfn = @homfitfn;
 distfn = @homdistfn;
-%degenfn = @isdegenerate;
-degenfn = @(x) 0;
+degenfn = @isdegenerate;
+%degenfn = @(x) 0;
 t = 3;
 s = 4; 
 feedback = 0;
