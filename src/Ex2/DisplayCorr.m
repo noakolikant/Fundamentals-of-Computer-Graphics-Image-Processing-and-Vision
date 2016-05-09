@@ -1,7 +1,7 @@
 function [ displayedCorr ] = DisplayCorr(image1, image2, matches, ...
 dist_vals, x)
 %DisplayCorr This function displays a chosen number of correspondences
-
+    displayedCorr = zeros(x, 4);
     [dist_vals_sorted, SortIndex] = sort(dist_vals, 'descend');
     matches_sorted = matches(SortIndex, :);
     for i=1:x
@@ -22,6 +22,8 @@ dist_vals, x)
     hold on;
     cols1 = size(im1,2);
     for i = 1: x
+        displayedCorr(i, :) = [matches_sorted(i,1), matches_sorted(i,2), ...
+            matches_sorted(i,3), matches_sorted(i,4)];
         plot(matches_sorted(i,2), matches_sorted(i,1),'ro')
         plot(matches_sorted(i, 4)+cols1, matches_sorted(i,3),'ro')
     end
