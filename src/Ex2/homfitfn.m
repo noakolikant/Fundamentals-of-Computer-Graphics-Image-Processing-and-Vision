@@ -1,13 +1,14 @@
 function [ H ] = homfitfn( matches )
-    rhs_point = matches(1:2, :)';
-    lhs_point = matches(4:5, :)';
-    
-    rhs_hom_point = [rhs_point ones(size(rhs_point,1), 1)]; % convert to home. coordinates
-    lhs_hom_point = [lhs_point ones(size(lhs_point,1), 1)]; % convert to home. coordinates
-    
-    [rhs_hom_point, rhs_T] = Normalize2dHomPoints(rhs_hom_point);
-    [lhs_hom_point, lhs_T] = Normalize2dHomPoints(lhs_hom_point);
-
+    rhs_point = matches(1:3, :)';
+    lhs_point = matches(4:6, :)';
+    for i=1:size(rhs_point, 1)
+        rhs_point(i, :) = rhs_point(i, :) ./ rhs_point(i, 3);
+        lhs_point(i, :) = lhs_point(i, :) ./ lhs_point(i, 3);
+    end
+ 
+    [rhs_hom_point, rhs_T] = Normalize2dHomPoints(rhs_point);
+    [lhs_hom_point, lhs_T] = Normalize2dHomPoints(lhs_point);
+   
     % Compute Ai
     A = [];
     x_lhs = lhs_hom_point(1,:);
@@ -25,6 +26,5 @@ function [ H ] = homfitfn( matches )
     
     h = reshape(V(:,9),3,3);
     H = inv(lhs_T) * h * rhs_T;
-    H = H';
     
 end
