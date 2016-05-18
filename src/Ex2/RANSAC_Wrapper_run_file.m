@@ -2,7 +2,7 @@
 fittingfn = @homfitfn;
 distfn = @homdistfn;
 degenfn = @isdegenerate;
-t = 0.001;
+t = 30;
 s = 4; 
 feedback = 0;
 maxDataTrials = 100;
