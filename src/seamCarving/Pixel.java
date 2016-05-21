@@ -22,7 +22,6 @@ public class Pixel {
 	
 	public List<Pixel> get_neighbors(int w, int h)
 	{
-		// TODO: I should insert all 8 possible neigbhors and then remove
 		List<Pixel> neighbors_list = new ArrayList<Pixel>();
 		Pixel p1 = new Pixel(this.x - 1, this.y - 1);
 		Pixel p2 = new Pixel(this.x - 1, this.y);

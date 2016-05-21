@@ -7,7 +7,6 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import RayTracing.RayTracer.RayTracerException;
 public class seamCarving {
 
 	public enum EnergyTypes {
