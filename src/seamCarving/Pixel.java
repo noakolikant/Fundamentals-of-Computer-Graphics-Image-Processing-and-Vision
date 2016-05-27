@@ -25,12 +25,12 @@ public class Pixel {
 		List<Pixel> neighbors_list = new ArrayList<Pixel>();
 		Pixel p1 = new Pixel(this.row_number - 1, this.col_number - 1);
 		Pixel p2 = new Pixel(this.row_number - 1, this.col_number);
-		Pixel p3 = new Pixel(this.row_number - 1, this.col_number);
+		Pixel p3 = new Pixel(this.row_number - 1, this.col_number + 1);
 		Pixel p4 = new Pixel(this.row_number, this.col_number -1);
 		Pixel p5 = new Pixel(this.row_number, this.col_number + 1);
 		Pixel p6 = new Pixel(this.row_number + 1, this.col_number - 1);
 		Pixel p7 = new Pixel(this.row_number + 1, this.col_number);
-		Pixel p8 = new Pixel(this.row_number + 1, this.col_number);
+		Pixel p8 = new Pixel(this.row_number + 1, this.col_number + 1);
 		
 		neighbors_list.add(p1);
 		neighbors_list.add(p2);
@@ -42,14 +42,26 @@ public class Pixel {
 		neighbors_list.add(p8);
 		
 		Iterator<Pixel> it = neighbors_list.iterator();
+		
+		List<Pixel> pixels_to_remove = new ArrayList<Pixel>();
+		
+		//First collect all nodes to remove
 		while(it.hasNext())
 		{
 			Pixel p = it.next();
 			if((p.row_number < 0) || (p.col_number < 0) || (p.row_number > h - 1) || (p.col_number > w - 1))
 			{
-				neighbors_list.remove(p);
+				pixels_to_remove.add(p);
 			}
 		}
+		
+		//Then Remove it from neighbors_list
+		it = pixels_to_remove.iterator();
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			neighbors_list.remove(p);
+		}		
 		return neighbors_list;
 	}
 	
