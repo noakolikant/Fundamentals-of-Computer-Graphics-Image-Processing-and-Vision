@@ -70,14 +70,23 @@ public class Pixel {
 		List<Pixel> neighbors_list = get_neighbors(w, h);
 		Iterator<Pixel> it = neighbors_list.iterator();
 		
+		List<Pixel> pixels_to_remove = new ArrayList<Pixel>();
+
 		while(it.hasNext())
 		{
 			Pixel p = it.next();
 			if(this.col_number - 1 != p.col_number)
 			{
-				neighbors_list.remove(p);
+				pixels_to_remove.add(p);
 			}
 		}
+		
+		it = pixels_to_remove.iterator();
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			neighbors_list.remove(p);
+		}		
 		return neighbors_list;
 	}
 }

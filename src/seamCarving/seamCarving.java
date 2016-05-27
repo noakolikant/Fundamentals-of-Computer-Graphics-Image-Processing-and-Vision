@@ -21,20 +21,25 @@ public class seamCarving {
 		int sum = 0;
 		int neighbors_num = 0;
 		
-		for(int a = 0; a < img.getWidth(); a++)
+		for(int a = 0; a < img.getHeight(); a++)
 		{
-			for(int b = 0; b < img.getHeight(); b++)
+			for(int b = 0; b < img.getWidth(); b++)
 			{
+				if(444 == b)
+				{
+//					System.out.println("b = " + b + "\n");
+				}
+				//System.out.println("a = " + a + " b = " + b + "\n");
 				Pixel p = new Pixel(a, b);
 				List<Pixel> neighbors_list = p.get_neighbors(img.getWidth(), img.getHeight());
 				neighbors_num = neighbors_list.size();
 				
-				Color self_color = new Color(img.getRGB(a, b));
+				Color self_color = new Color(img.getRGB(b, a));
 				
 				while(neighbors_list.size() > 0)
 				{
 					Pixel neighbor = neighbors_list.remove(0);
-					Color color_neighbor = new Color(img.getRGB(neighbor.row_number, neighbor.col_number));
+					Color color_neighbor = new Color(img.getRGB(neighbor.col_number, neighbor.row_number));
 					sum = sum + Math.abs(color_neighbor.getRed()-self_color.getRed()) +
 							Math.abs(color_neighbor.getBlue()-self_color.getBlue()) + Math.abs(color_neighbor.getGreen()-self_color.getGreen());
 				}
