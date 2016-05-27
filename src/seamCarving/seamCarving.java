@@ -1,5 +1,6 @@
 package seamCarving;
 
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class seamCarving {
 	
 	public static int[][] compute_energy_mat_from_image(BufferedImage img)
 	{
-		int [][] energy_matrix = new int [img.getWidth()][img.getHeight()];
+		int [][] energy_matrix = new int [img.getHeight()][img.getWidth()];
 		int sum = 0;
 		int neighbors_num = 0;
 		
@@ -27,12 +28,15 @@ public class seamCarving {
 				Pixel p = new Pixel(a, b);
 				List<Pixel> neighbors_list = p.get_neighbors(img.getWidth(), img.getHeight());
 				neighbors_num = neighbors_list.size();
-				int [] rgb_self = img.getRGB(a, b, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
+				
+				Color self_color = new Color(img.getRGB(a, b));
+				
 				while(neighbors_list.size() > 0)
 				{
 					Pixel neighbor = neighbors_list.remove(0);
-					int [] rgb_neighbor = img.getRGB(neighbor.row_number, neighbor.col_number, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
-					sum = sum + Math.abs(rgb_neighbor[0]-rgb_self[0]) + Math.abs(rgb_neighbor[1]-rgb_self[1]) + Math.abs(rgb_neighbor[2]-rgb_self[2]);
+					Color color_neighbor = new Color(img.getRGB(neighbor.row_number, neighbor.col_number));
+					sum = sum + Math.abs(color_neighbor.getRed()-self_color.getRed()) +
+							Math.abs(color_neighbor.getBlue()-self_color.getBlue()) + Math.abs(color_neighbor.getGreen()-self_color.getGreen());
 				}
 				energy_matrix[a][b] = sum / neighbors_num; // normalize it to number of neighbors.
 			}
@@ -145,6 +149,7 @@ public class seamCarving {
 		int rows_num_after = Integer.parseInt(args[2]);
 		int energy_type = Integer.parseInt(args[3]);
 		String output_image_file = args[4];
+		// note for Noa's debugging used origin picture has width = 962, height = 445
 		
 		try
 	    {
