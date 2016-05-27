@@ -1,6 +1,7 @@
 package seamCarving;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -15,6 +16,21 @@ public class Seam {
 		this.max_length = max_length;
 		this.pixels_list = new ArrayList<Pixel>();
 		this.total_energy = 0;
+	}
+	
+	public Seam(Seam s)
+	{
+		this.max_length = s.max_length;
+		this.total_energy = s.total_energy;
+		
+		Iterator<Pixel> it = s.pixels_list.iterator();
+		
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			Pixel p_copy = new Pixel(p);
+			this.pixels_list.add(p_copy);
+		}		
 	}
 	
 	public void insert_pixel(Pixel p, int added_energy)
