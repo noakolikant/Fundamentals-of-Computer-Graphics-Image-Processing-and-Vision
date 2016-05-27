@@ -6,20 +6,23 @@ import java.util.List;
 
 public class Seam {
 	
-	int seam_length;
+	public int max_length;
 	List<Pixel> pixels_list;
+	int total_energy;
 	
-	public Seam(int seam_length)
+	public Seam(int max_length)
 	{
-		this.seam_length = seam_length;
+		this.max_length = max_length;
 		this.pixels_list = new ArrayList<Pixel>();
+		this.total_energy = 0;
 	}
 	
-	public void insert_pixel(Pixel p)
+	public void insert_pixel(Pixel p, int added_energy)
 	{
-		if(this.pixels_list.size() < this.seam_length)
+		if(this.pixels_list.size() < this.max_length)
 		{
 			this.pixels_list.add(p);
+			this.total_energy += added_energy;
 		}
 		else
 		{

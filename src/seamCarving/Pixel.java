@@ -5,32 +5,32 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Pixel {
-	int x;
-	int y;
+	int row_number;
+	int col_number;
 	
-	public Pixel(int x, int y)
+	public Pixel(int row_number, int col_number)
 	{
-		this.x = x;
-		this.y = y;
+		this.row_number = row_number; 
+		this.col_number = col_number;
 	}
 	
 	public Pixel(Pixel p)
 	{
-		this.x = p.x;
-		this.y = p.y;
+		this.row_number = p.row_number;
+		this.col_number = p.col_number;
 	}
 	
 	public List<Pixel> get_neighbors(int w, int h)
 	{
 		List<Pixel> neighbors_list = new ArrayList<Pixel>();
-		Pixel p1 = new Pixel(this.x - 1, this.y - 1);
-		Pixel p2 = new Pixel(this.x - 1, this.y);
-		Pixel p3 = new Pixel(this.x - 1, this.y);
-		Pixel p4 = new Pixel(this.x, this.y -1);
-		Pixel p5 = new Pixel(this.x, this.y + 1);
-		Pixel p6 = new Pixel(this.x + 1, this.y - 1);
-		Pixel p7 = new Pixel(this.x + 1, this.y);
-		Pixel p8 = new Pixel(this.x + 1, this.y);
+		Pixel p1 = new Pixel(this.row_number - 1, this.col_number - 1);
+		Pixel p2 = new Pixel(this.row_number - 1, this.col_number);
+		Pixel p3 = new Pixel(this.row_number - 1, this.col_number);
+		Pixel p4 = new Pixel(this.row_number, this.col_number -1);
+		Pixel p5 = new Pixel(this.row_number, this.col_number + 1);
+		Pixel p6 = new Pixel(this.row_number + 1, this.col_number - 1);
+		Pixel p7 = new Pixel(this.row_number + 1, this.col_number);
+		Pixel p8 = new Pixel(this.row_number + 1, this.col_number);
 		
 		neighbors_list.add(p1);
 		neighbors_list.add(p2);
@@ -45,7 +45,23 @@ public class Pixel {
 		while(it.hasNext())
 		{
 			Pixel p = it.next();
-			if((p.x < 0) || (p.y < 0) || (x > h - 1) || (y > w - 1))
+			if((p.row_number < 0) || (p.col_number < 0) || (p.row_number > h - 1) || (p.col_number > w - 1))
+			{
+				neighbors_list.remove(p);
+			}
+		}
+		return neighbors_list;
+	}
+	
+	public List<Pixel> get_left_neighbors(int w, int h)
+	{
+		List<Pixel> neighbors_list = get_neighbors(w, h);
+		Iterator<Pixel> it = neighbors_list.iterator();
+		
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			if(this.col_number - 1 != p.col_number)
 			{
 				neighbors_list.remove(p);
 			}
