@@ -19,24 +19,6 @@ public class seamCarving {
 	    REGULAR_WITHOUT_ENTROPY, REGULAR_WITH_ENTROPY, FORWARD_ENERGY
 	}
 	
-	public static int[][] trasposeMatrix(int[][] matrix)
-	{
-	    int m = matrix.length;
-	    int n = matrix[0].length;
-
-	    int[][] trasposedMatrix = new int[n][m];
-
-	    for(int x = 0; x < n; x++)
-	    {
-	        for(int y = 0; y < m; y++)
-	        {
-	            trasposedMatrix[x][y] = matrix[y][x];
-	        }
-	    }
-
-	    return trasposedMatrix;
-	}
-	
 	public static int[] trasposeArr(int[] arr, int m, int n)
 	{
 	    int[] trasposedArr = new int[n * m];
@@ -51,11 +33,11 @@ public class seamCarving {
 	    return trasposedArr;
 	}
 	
-	public static int[][] compute_energy_mat_from_image(BufferedImage img)
+	public static double [][]compute_regular_energy(BufferedImage img)
 	{
 		int w = img.getWidth();
 		int h = img.getHeight();
-		int [][] energy_matrix = new int [h][w];
+		double [][] energy_matrix = new double [h][w];
 		int sum = 0;
 		int neighbors_num = 0;
 		
@@ -80,20 +62,92 @@ public class seamCarving {
 				}
 				energy_matrix[a][b] = sum / neighbors_num; // normalize it to number of neighbors.
 			}
-			//TODO: compute entropy if requested. Maybe not here
 		}
 		return energy_matrix;
 	}
 	
-	public static int [][] update_enegy_mat(int [][]energy_mat, BufferedImage new_img, Seam s)
+	public static double get_gray_color_from_rgb(Color c)
 	{
-		return compute_energy_mat_from_image(new_img);
+		return (c.getBlue() + c.getGreen() + c.getRed()) / 3;
+	}
+	
+	public static double [][]compute_entropy_energy(BufferedImage img)
+	{
+		int w = img.getWidth();
+		int h = img.getHeight();
+		double [][] energy_matrix = new double [h][w];
+		double H = 0;
+		
+		for(int a = 0; a < img.getHeight(); a++)
+		{
+			for(int b = 0; b < img.getWidth(); b++)
+			{
+				H = 0;
+				Pixel p = new Pixel(a, b);
+				List<Pixel> neighbors_list = p.get_enthropy_members(img.getWidth(), img.getHeight());
+								
+				//Calculate the total grey colors
+				double sum_grey = 0;
+				Iterator<Pixel> it = neighbors_list.iterator();
+				while(it.hasNext())
+				{
+					Pixel p_grey = it.next();
+					Color color_neighbor = new Color(img.getRGB(p_grey.col_number, p_grey.row_number));
+					sum_grey += get_gray_color_from_rgb(color_neighbor);
+				}
+				
+				while(neighbors_list.size() > 0)
+				{
+					Pixel neighbor = neighbors_list.remove(0);
+					Color color_neighbor = new Color(img.getRGB(neighbor.col_number, neighbor.row_number));
+					
+					double P_mn = get_gray_color_from_rgb(color_neighbor) / sum_grey;
+					H -= Math.abs(P_mn * Math.log(P_mn));
+				}
+				energy_matrix[a][b] = H;
+			}
+		}
+		return energy_matrix;
+	}
+	
+	
+	public static double[][] compute_energy_mat_from_image(BufferedImage img, EnergyTypes energy_type)
+	{
+		int w = img.getWidth();
+		int h = img.getHeight();
+		double [][] energy_matrix = new double [h][w];
+
+		double [][] regular_enrgy_mat = compute_regular_energy(img);
+		if(energy_type == EnergyTypes.REGULAR_WITHOUT_ENTROPY)
+		{
+			return regular_enrgy_mat;
+		}
+		if(energy_type == EnergyTypes.REGULAR_WITH_ENTROPY)
+		{
+			double [][] entropy_energy_mat = compute_entropy_energy(img);
+			for(int i = 0; i < h; i ++)
+			{
+				for(int j = 0; j < w; j++)
+				{
+					//TODO: understand if we have to choose a weighted combination of the two energies are just add them.
+					//If so I think that entropy should be scaled to have as much influence as the regular enrgy values (are about 10 times more)
+					regular_enrgy_mat[i][j] = regular_enrgy_mat[i][j] + entropy_energy_mat[i][j];
+				}
+			}
+		}
+		
+		return energy_matrix;
+	}
+
+	public static double [][] update_enegy_mat(double [][]energy_mat, BufferedImage new_img, Seam s, EnergyTypes energy_type)
+	{
+		return compute_energy_mat_from_image(new_img, energy_type);
 		//TODO: copy all unchanged seam to their new place
 		//TODO: re calculate energy for seam's up and down neighbors
 		
 	}
 	
-	public static Seam pick_next_seam_dynamic_function(Seam [][] working_table, int [][] energy_mat, Pixel p)
+	public static Seam pick_next_seam_dynamic_function(Seam [][] working_table, double [][] energy_mat, Pixel p)
 	{
 		//if(1 == p.col_number)
 		{
@@ -141,7 +195,7 @@ public class seamCarving {
 	}
 
 	//TODO: change function to be able to return the minimum k seams and not one only (for the enlarging part)
-	public static Seam pick_next_seam(int [][] energy_mat)
+	public static Seam pick_next_seam(double[][] energy_mat)
 	{
 		int rows = energy_mat.length;
 		int cols = energy_mat[0].length;
@@ -257,7 +311,8 @@ public class seamCarving {
 		String image_file = args[0];
 		int cols_num_after = Integer.parseInt(args[1]);
 		int rows_num_after = Integer.parseInt(args[2]);
-		int energy_type = Integer.parseInt(args[3]);
+		int energy_type_integer = Integer.parseInt(args[3]);
+		EnergyTypes energy_type = EnergyTypes.values()[energy_type_integer];
 		String output_image_file = args[4];
 		// note for Noa's debugging used origin picture has width = 962, height = 445
 		
@@ -271,7 +326,7 @@ public class seamCarving {
 	      int delta_rows = input_image.getHeight() - rows_num_after;
 
 	      //Calculate full energy matrix for all pixels on the first time
-	      int [][] energy_mat = compute_energy_mat_from_image(output_image);
+	      double [][] energy_mat = compute_energy_mat_from_image(output_image, energy_type);
 
     	  //TODO: Decide to if the next operation is for row or col. If a col generate a transposed energy matrix.
 
@@ -287,7 +342,7 @@ public class seamCarving {
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
-	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam);
+	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam, energy_type);
 	    	  }
 	      }
 	      
@@ -305,7 +360,7 @@ public class seamCarving {
 	    	  red_seams_image = deepCopy(output_image);
 	    	  
 	    	  //TODO: instead of recalculating it rotate it
-	    	  energy_mat = compute_energy_mat_from_image(output_image);
+	    	  energy_mat = compute_energy_mat_from_image(output_image, energy_type);
 	    	  
 	    	  //TODO: transpose image
 	    	  for(int i = 0; i < delta_cols; i ++)
@@ -317,7 +372,7 @@ public class seamCarving {
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
-	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam);
+	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam, energy_type);
 	    	  }
 	    	  
 	    	  //transpose again

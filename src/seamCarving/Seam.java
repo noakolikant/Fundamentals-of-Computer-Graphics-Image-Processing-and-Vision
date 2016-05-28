@@ -9,7 +9,7 @@ public class Seam {
 	
 	public int max_length;
 	List<Pixel> pixels_list;
-	int total_energy;
+	double total_energy;
 	
 	public Seam(int max_length)
 	{
@@ -34,7 +34,7 @@ public class Seam {
 		}		
 	}
 	
-	public void insert_pixel(Pixel p, int added_energy)
+	public void insert_pixel(Pixel p, double added_energy)
 	{
 		if(this.pixels_list.size() < this.max_length)
 		{
