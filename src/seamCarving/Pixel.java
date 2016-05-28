@@ -20,6 +20,31 @@ public class Pixel {
 		this.col_number = p.col_number;
 	}
 	
+	private static void remove_unreal_pixels(List<Pixel> pixels_list, int w, int h)
+	{
+		Iterator<Pixel> it = pixels_list.iterator();
+		
+		List<Pixel> pixels_to_remove = new ArrayList<Pixel>();
+		
+		//First collect all nodes to remove
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			if((p.row_number < 0) || (p.col_number < 0) || (p.row_number > h - 1) || (p.col_number > w - 1))
+			{
+				pixels_to_remove.add(p);
+			}
+		}
+		
+		//Then Remove it from neighbors_list
+		it = pixels_to_remove.iterator();
+		while(it.hasNext())
+		{
+			Pixel p = it.next();
+			pixels_list.remove(p);
+		}		
+	}
+	
 	public List<Pixel> get_neighbors(int w, int h)
 	{
 		List<Pixel> neighbors_list = new ArrayList<Pixel>();
@@ -41,27 +66,7 @@ public class Pixel {
 		neighbors_list.add(p7);
 		neighbors_list.add(p8);
 		
-		Iterator<Pixel> it = neighbors_list.iterator();
-		
-		List<Pixel> pixels_to_remove = new ArrayList<Pixel>();
-		
-		//First collect all nodes to remove
-		while(it.hasNext())
-		{
-			Pixel p = it.next();
-			if((p.row_number < 0) || (p.col_number < 0) || (p.row_number > h - 1) || (p.col_number > w - 1))
-			{
-				pixels_to_remove.add(p);
-			}
-		}
-		
-		//Then Remove it from neighbors_list
-		it = pixels_to_remove.iterator();
-		while(it.hasNext())
-		{
-			Pixel p = it.next();
-			neighbors_list.remove(p);
-		}		
+		remove_unreal_pixels(neighbors_list, w, h);
 		return neighbors_list;
 	}
 	
@@ -87,6 +92,21 @@ public class Pixel {
 			Pixel p = it.next();
 			neighbors_list.remove(p);
 		}		
+		return neighbors_list;
+	}
+	
+	public List<Pixel> get_enthropy_members(int w, int h)
+	{
+		List<Pixel> neighbors_list = new ArrayList<Pixel>();
+		for(int i = this.row_number - 4; i < this.row_number + 5; i++)
+		{
+			for(int j =  this.col_number - 4; j < this.col_number + 5; j++)
+			{
+				Pixel p = new Pixel(i, j);
+				neighbors_list.add(p);
+			}
+		}
+		remove_unreal_pixels(neighbors_list, w, h);
 		return neighbors_list;
 	}
 }
