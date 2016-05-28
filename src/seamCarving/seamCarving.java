@@ -19,6 +19,38 @@ public class seamCarving {
 	    REGULAR_WITHOUT_ENTROPY, REGULAR_WITH_ENTROPY, FORWARD_ENERGY
 	}
 	
+	public static int[][] trasposeMatrix(int[][] matrix)
+	{
+	    int m = matrix.length;
+	    int n = matrix[0].length;
+
+	    int[][] trasposedMatrix = new int[n][m];
+
+	    for(int x = 0; x < n; x++)
+	    {
+	        for(int y = 0; y < m; y++)
+	        {
+	            trasposedMatrix[x][y] = matrix[y][x];
+	        }
+	    }
+
+	    return trasposedMatrix;
+	}
+	
+	public static int[] trasposeArr(int[] arr, int m, int n)
+	{
+	    int[] trasposedArr = new int[n * m];
+
+	    for(int x = 0; x < m; x++)
+	    {
+	        for(int y = 0; y < n; y++)
+	        {
+	        	trasposedArr[n * x + y] = arr[y * m + x];
+	        }
+	    }
+	    return trasposedArr;
+	}
+	
 	public static int[][] compute_energy_mat_from_image(BufferedImage img)
 	{
 		int w = img.getWidth();
@@ -164,7 +196,7 @@ public class seamCarving {
 	}
 	
 	//debug_func
-	static void color_seam_on_image(Seam s, BufferedImage input_image, int operation_number) throws IOException
+	static void color_seam_on_image(Seam s, BufferedImage input_image, int operation_number, String seam_direction) throws IOException
 	{
 		int r = 255;
 		int g = 0;
@@ -179,7 +211,7 @@ public class seamCarving {
 			input_image.setRGB(p.col_number, p.row_number, col);
 		}
 		
-		String outputfile = "C:\\Users\\noa\\Desktop\\red_seam" + operation_number + ".jpg";
+		String outputfile = "C:\\Users\\noa\\Desktop\\" + seam_direction + "_" + operation_number + ".jpg";
 		saveImage(outputfile, input_image);
 	}
 
@@ -251,7 +283,7 @@ public class seamCarving {
 	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
 
 	    		  //For debug
-	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i);
+	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i, "horizontal");
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
@@ -261,12 +293,15 @@ public class seamCarving {
 	      
 	      if(delta_cols > 0)
 	      {
-	    	  AffineTransform tx = new AffineTransform();
-	    	  tx.rotate(Math.PI/2, output_image.getWidth()/2, output_image.getHeight()/2);
+    	      int w_before_transpose = output_image.getWidth();
+    	      int h_before_transpose = output_image.getHeight(); 
 	    	  
-	    	  AffineTransformOp op = new AffineTransformOp(tx,
-	    		        AffineTransformOp.TYPE_BILINEAR);
-	    	  output_image = op.filter(output_image, null);
+	    	  int[] rgb_arr = new int [h_before_transpose * w_before_transpose]; 
+	    	  output_image.getRGB(0, 0, w_before_transpose, h_before_transpose, rgb_arr, 0, w_before_transpose);
+	    	  rgb_arr = trasposeArr(rgb_arr, w_before_transpose, h_before_transpose);
+	    	  output_image = new BufferedImage(h_before_transpose, w_before_transpose,
+	    			  output_image.getType());
+	    	  output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);	    	  
 	    	  red_seams_image = deepCopy(output_image);
 	    	  
 	    	  //TODO: instead of recalculating it rotate it
@@ -278,21 +313,26 @@ public class seamCarving {
 	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
 
 	    		  //For debug
-	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i);
+	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i, "vertical");
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
 	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam);
 	    	  }
-	    	  //TODO: transpose again
-	    	  tx = new AffineTransform();
-	    	  tx.rotate(-Math.PI/2, output_image.getWidth()/2, output_image.getHeight()/2);
 	    	  
-	    	  op = new AffineTransformOp(tx,
-	    		        AffineTransformOp.TYPE_BILINEAR);
-	    	  output_image = op.filter(output_image, null);
+	    	  //transpose again
+	    	  h_before_transpose = output_image.getHeight();
+	    	  w_before_transpose = output_image.getWidth();
+	    	  rgb_arr = new int [h_before_transpose * w_before_transpose]; 
+	    	  output_image.getRGB(0, 0, w_before_transpose, h_before_transpose, rgb_arr, 0, w_before_transpose);
+	    	  rgb_arr = trasposeArr(rgb_arr, w_before_transpose, h_before_transpose);
+	    	  output_image = new BufferedImage(h_before_transpose, w_before_transpose,
+	    			  output_image.getType());
+	    	  output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);	    	  
+	    	  red_seams_image = deepCopy(output_image);
 	      }
-	      //TODO: remove the addition to square created when rotating the image
+
+	      output_image = output_image.getSubimage(0, 0, cols_num_after, rows_num_after);
 	      saveImage(output_image_file, output_image);
 	    } 
 		catch (IOException e)
