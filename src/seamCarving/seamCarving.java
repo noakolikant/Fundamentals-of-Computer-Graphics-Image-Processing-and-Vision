@@ -2,6 +2,7 @@ package seamCarving;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +49,15 @@ public class seamCarving {
 			//TODO: compute entropy if requested. Maybe not here
 		}
 		return energy_matrix;
+	}
+	
+	//TODO: Add an option of removed seam or added seam
+	public static int [][] update_enegy_mat(int [][]energy_mat, BufferedImage new_img, Seam s)
+	{
+		return compute_energy_mat_from_image(new_img);
+		//TODO: copy all unchanged seam to their new place
+		//TODO: re calculate energy for seam's up and down neighbors
+		
 	}
 	
 	public static Seam pick_next_seam_dynamic_function(Seam [][] working_table, int [][] energy_mat, Pixel p)
@@ -153,7 +163,7 @@ public class seamCarving {
 	}
 	
 	//debug_func
-	static void color_seam_on_image(Seam s, BufferedImage input_image) throws IOException
+	static void color_seam_on_image(Seam s, BufferedImage input_image, int operation_number) throws IOException
 	{
 		int r = 255;
 		int g = 0;
@@ -168,8 +178,16 @@ public class seamCarving {
 			input_image.setRGB(p.col_number, p.row_number, col);
 		}
 		
-		String outputfile = "C:\\Users\\noa\\Desktop\\red_seam.jpg";
+		String outputfile = "C:\\Users\\noa\\Desktop\\red_seam" + operation_number + ".jpg";
 		saveImage(outputfile, input_image);
+	}
+
+	public static BufferedImage deepCopy(BufferedImage bi)
+	{
+		ColorModel cm = bi.getColorModel();
+		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		WritableRaster raster = bi.copyData(null);
+		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
 	}
 	
 	public static BufferedImage remove_seam_from_image(Seam s, BufferedImage img)
@@ -212,29 +230,40 @@ public class seamCarving {
 		
 		try
 	    {
-	      BufferedImage output_image, input_image = ImageIO.read(new File(image_file));
+	      BufferedImage input_image = ImageIO.read(new File(image_file));
+	      BufferedImage output_image = deepCopy(input_image);
+	      BufferedImage red_seams_image = deepCopy(input_image);
+	      
 	      int delta_cols = input_image.getWidth() - cols_num_after;
 	      int delta_rows = input_image.getHeight() - rows_num_after;
-	      
-	      int [][] energy_mat = compute_energy_mat_from_image(input_image);
-	      
-	      //TODO: Decide to if the next operation is for row or col. If a col generate a transposed energy matrix.
-	      
-	      Seam lowest_energy_seam= pick_next_seam(energy_mat);
-	      
-	      //For debug
-	      color_seam_on_image(lowest_energy_seam, input_image);
-	      
-	      //TODO: add an if for duplicate or remove seam. right now there is only removing
-	      output_image = remove_seam_from_image(lowest_energy_seam, input_image);
 
+	      //Calculate full energy matrix for all pixels on the first time
+	      int [][] energy_mat = compute_energy_mat_from_image(output_image);
+
+    	  //TODO: Decide to if the next operation is for row or col. If a col generate a transposed energy matrix.
+
+	      //Removing delta_rows rows from image
+	      if(delta_rows > 0)
+	      {
+	    	  for(int i = 0; i < delta_rows; i ++)
+	    	  {
+	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
+
+	    		  //For debug
+	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i);
+
+	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
+	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
+	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam);
+	    	  }
+	      }
+	      
 	      saveImage(output_image_file, output_image);
-	      //TODO: Update energy mat instead of re calculating it (It's taking a long time)
 	    } 
-	    catch (IOException e)
-	    {
+		catch (IOException e)
+		{
 			System.out.println(e.getMessage());
-	    }
+		}
 		
 
 	}
