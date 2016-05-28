@@ -2,6 +2,7 @@ package seamCarving;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -140,6 +141,17 @@ public class seamCarving {
 		return winning_seam;
 	}
 	
+	static void saveImage(String path, BufferedImage input_image)
+	{
+		try {
+
+			ImageIO.write(input_image, "png", new File(path));
+
+		} catch (IOException e) {
+			System.out.println("ERROR SAVING FILE: " + e.getMessage());
+		}
+	}
+	
 	//debug_func
 	static void color_seam_on_image(Seam s, BufferedImage input_image) throws IOException
 	{
@@ -157,14 +169,36 @@ public class seamCarving {
 		}
 		
 		String outputfile = "C:\\Users\\noa\\Desktop\\red_seam.jpg";
-
-		try {
-
-			ImageIO.write(input_image, "png", new File(outputfile));
-
-		} catch (IOException e) {
-			System.out.println("ERROR SAVING FILE: " + e.getMessage());
+		saveImage(outputfile, input_image);
+	}
+	
+	public static BufferedImage remove_seam_from_image(Seam s, BufferedImage img)
+	{
+		Seam local_seam_copy = new Seam(s);
+		
+		int type = img.getType();
+		int w = img.getWidth();
+		int h = img.getHeight();
+		
+		//The image is -1 less in height
+		BufferedImage output_img = new BufferedImage(w, h - 1, type);
+		int output_img_col_index = 0;
+		
+		for(int a = 0; a < w; a++)
+		{	
+			output_img_col_index = 0;
+			Pixel p = local_seam_copy.pixels_list.remove(0);
+			for(int b = 0; b < h; b++)
+			{
+				//copy all col but seam's
+				if(p.row_number != b)
+				{
+					output_img.setRGB(a, output_img_col_index, img.getRGB(a, b));
+					output_img_col_index++;
+				}
+			}
 		}
+		return output_img;
 	}
 	
 	public static void main(String[] args) {
@@ -178,23 +212,24 @@ public class seamCarving {
 		
 		try
 	    {
-	      BufferedImage input_image = ImageIO.read(new File(image_file));
+	      BufferedImage output_image, input_image = ImageIO.read(new File(image_file));
 	      int delta_cols = input_image.getWidth() - cols_num_after;
 	      int delta_rows = input_image.getHeight() - rows_num_after;
 	      
 	      int [][] energy_mat = compute_energy_mat_from_image(input_image);
 	      
-	      //TODO: Decide to remove row or col. If a col generate a transposed energy matrix.
+	      //TODO: Decide to if the next operation is for row or col. If a col generate a transposed energy matrix.
 	      
 	      Seam lowest_energy_seam= pick_next_seam(energy_mat);
 	      
 	      //For debug
 	      color_seam_on_image(lowest_energy_seam, input_image);
 	      
-	      //TODO: Remove / Duplicate the chosen seam.
-	      
+	      //TODO: add an if for duplicate or remove seam. right now there is only removing
+	      output_image = remove_seam_from_image(lowest_energy_seam, input_image);
+
+	      saveImage(output_image_file, output_image);
 	      //TODO: Update energy mat instead of re calculating it (It's taking a long time)
-	      
 	    } 
 	    catch (IOException e)
 	    {
