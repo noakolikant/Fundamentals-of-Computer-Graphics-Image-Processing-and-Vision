@@ -1,6 +1,8 @@
 package seamCarving;
 
 import java.awt.Color;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -51,7 +53,6 @@ public class seamCarving {
 		return energy_matrix;
 	}
 	
-	//TODO: Add an option of removed seam or added seam
 	public static int [][] update_enegy_mat(int [][]energy_mat, BufferedImage new_img, Seam s)
 	{
 		return compute_energy_mat_from_image(new_img);
@@ -258,14 +259,45 @@ public class seamCarving {
 	    	  }
 	      }
 	      
+	      if(delta_cols > 0)
+	      {
+	    	  AffineTransform tx = new AffineTransform();
+	    	  tx.rotate(Math.PI/2, output_image.getWidth()/2, output_image.getHeight()/2);
+	    	  
+	    	  AffineTransformOp op = new AffineTransformOp(tx,
+	    		        AffineTransformOp.TYPE_BILINEAR);
+	    	  output_image = op.filter(output_image, null);
+	    	  red_seams_image = deepCopy(output_image);
+	    	  
+	    	  //TODO: instead of recalculating it rotate it
+	    	  energy_mat = compute_energy_mat_from_image(output_image);
+	    	  
+	    	  //TODO: transpose image
+	    	  for(int i = 0; i < delta_cols; i ++)
+	    	  {
+	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
+
+	    		  //For debug
+	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i);
+
+	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
+	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
+	    		  energy_mat = update_enegy_mat(energy_mat, output_image, lowest_energy_seam);
+	    	  }
+	    	  //TODO: transpose again
+	    	  tx = new AffineTransform();
+	    	  tx.rotate(-Math.PI/2, output_image.getWidth()/2, output_image.getHeight()/2);
+	    	  
+	    	  op = new AffineTransformOp(tx,
+	    		        AffineTransformOp.TYPE_BILINEAR);
+	    	  output_image = op.filter(output_image, null);
+	      }
+	      //TODO: remove the addition to square created when rotating the image
 	      saveImage(output_image_file, output_image);
 	    } 
 		catch (IOException e)
 		{
 			System.out.println(e.getMessage());
 		}
-		
-
 	}
-
 }
