@@ -22,6 +22,7 @@ public class Seam {
 	{
 		this.max_length = s.max_length;
 		this.total_energy = s.total_energy;
+		this.pixels_list = new ArrayList<Pixel>();
 		
 		Iterator<Pixel> it = s.pixels_list.iterator();
 		
@@ -45,5 +46,10 @@ public class Seam {
 			System.out.println("Trying to add another pixel to full seam failed.");
 			System.exit(-1);
 		}
+	}
+	
+	public void finalize()
+	{
+		this.pixels_list.clear();
 	}
 }
