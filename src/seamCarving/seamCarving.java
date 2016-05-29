@@ -130,7 +130,7 @@ public class seamCarving {
 				for(int j = 0; j < w; j++)
 				{
 					//TODO: understand if we have to choose a weighted combination of the two energies are just add them.
-					//If so I think that entropy should be scaled to have as much influence as the regular enrgy values (are about 10 times more)
+					//If so I think that entropy should be scaled to have as much influence as the regular energy values (are about 10 times more)
 					regular_enrgy_mat[i][j] = regular_enrgy_mat[i][j] + entropy_energy_mat[i][j];
 				}
 			}
@@ -146,12 +146,13 @@ public class seamCarving {
 		//TODO: re calculate energy for seam's up and down neighbors
 		
 	}
-	
-	public static Seam pick_next_seam_dynamic_function(Seam [][] working_table, double [][] energy_mat, Pixel p)
+
+	public static DynamicProgrammingTableEnrty pick_next_seam_dynamic_function
+	(DynamicProgrammingTableEnrty [][] working_table, double [][] energy_mat, Pixel p)
 	{
 		//if(1 == p.col_number)
 		{
-		//System.out.println("pick_next_seam_dynamic_function p = (" + p.row_number + ", " + p.col_number + ")\n");
+			//System.out.println("pick_next_seam_dynamic_function p = (" + p.row_number + ", " + p.col_number + ")\n");
 		}
 		int rows = energy_mat.length;
 		int cols = energy_mat[0].length;
@@ -159,15 +160,15 @@ public class seamCarving {
 		//Basic case initializes a seam with the first pixel
 		if(0 == p.col_number)
 		{
-			Seam s = new Seam (cols);
-			s.insert_pixel(p, energy_mat[p.row_number][p.col_number]);
+			DynamicProgrammingTableEnrty s = new DynamicProgrammingTableEnrty(p, energy_mat[p.row_number][p.col_number]);
 			return s;
 		}
 		
 		List<Pixel> left_neighbors_list = p.get_left_neighbors(cols, rows);
 		Iterator<Pixel> it = left_neighbors_list.iterator();
 		
-		Seam winning_seam = null, returned_seam = null;
+		DynamicProgrammingTableEnrty winning_entry = null, returned_enrty = null;
+		Pixel winning_pixel = null;
 
 		//Making sure the dynamic programming calculation for all three left neighbors was done.
 		while(it.hasNext())
@@ -175,23 +176,24 @@ public class seamCarving {
 			Pixel neighbor = it.next();
 			if(null == working_table[neighbor.row_number][neighbor.col_number])
 			{
-				returned_seam = pick_next_seam_dynamic_function(working_table, energy_mat, neighbor);
-				working_table[neighbor.row_number][neighbor.col_number] = returned_seam;
+				returned_enrty = pick_next_seam_dynamic_function(working_table, energy_mat, neighbor);
+				working_table[neighbor.row_number][neighbor.col_number] = returned_enrty;
 			}
 			else
 			{
-				returned_seam = working_table[neighbor.row_number][neighbor.col_number];
+				returned_enrty = working_table[neighbor.row_number][neighbor.col_number];
 			}
-			if((null == winning_seam) || (returned_seam.total_energy < winning_seam.total_energy))
+			if((null == winning_entry) || (returned_enrty.total_energy < winning_entry.total_energy))
 			{
-				winning_seam = returned_seam;
+				winning_entry = returned_enrty;
+				winning_pixel = neighbor;
 			}
 		}
-		Seam new_winning_seam = new Seam(winning_seam);
-		new_winning_seam.insert_pixel(p, energy_mat[p.row_number][p.col_number]);
-		working_table[p.row_number][p.col_number] = new_winning_seam;
+		DynamicProgrammingTableEnrty current_new_entry = new
+				DynamicProgrammingTableEnrty(winning_pixel, winning_entry.total_energy + energy_mat[p.row_number][p.col_number]);
+		working_table[p.row_number][p.col_number] = current_new_entry;
 		
-		return new_winning_seam;
+		return current_new_entry;
 	}
 
 	//TODO: change function to be able to return the minimum k seams and not one only (for the enlarging part)
@@ -200,7 +202,7 @@ public class seamCarving {
 		int rows = energy_mat.length;
 		int cols = energy_mat[0].length;
 		
-		Seam [][] table = new Seam [rows][cols];
+		DynamicProgrammingTableEnrty [][] table = new DynamicProgrammingTableEnrty [rows][cols];
 		
 		// Initialize all matrix to -1
 		for(int i = 0; i < rows; i++)
@@ -214,28 +216,37 @@ public class seamCarving {
 		//Initialize all most left  seam parts in the dynamic programming's table
 		for(int i = 0; i < rows; i++)
 		{
-			Seam s = new Seam(cols);
-			Pixel first_pixel = new Pixel(i, 0);
-			s.insert_pixel(first_pixel, energy_mat[i][0]);
+			DynamicProgrammingTableEnrty dpte = new DynamicProgrammingTableEnrty(i, 0, energy_mat[i][0]);
+			table[i][0] = dpte;
 		}
 		
-		Seam winning_seam = null, returned_seam = null;
-		
-		//Calculate and pick minimum seam
+		DynamicProgrammingTableEnrty winning_entry = null, returned_entry = null;
+		Pixel first_pixel_in_seam = null;
+		//Calculate and pick table entry
 		for(int i = 0; i < rows; i++)
 		{
 			Pixel p = new Pixel(i, cols - 1); 
-			returned_seam = pick_next_seam_dynamic_function(table, energy_mat, p);
-			if(null == winning_seam)
+			returned_entry = pick_next_seam_dynamic_function(table, energy_mat, p);
+			if((null == winning_entry)||(returned_entry.total_energy < winning_entry.total_energy))
 			{
-				winning_seam = returned_seam;
+				winning_entry = returned_entry;
+				first_pixel_in_seam = new Pixel(i, cols - 1);
 			}
-			if(returned_seam.total_energy < winning_seam.total_energy)
-			{
-				winning_seam = returned_seam;
-			}
-		}		
-		return winning_seam;
+		}
+		
+		//create the chosen seam
+		Seam result_seam = new Seam(cols);
+		Pixel pixel_it = first_pixel_in_seam;
+		DynamicProgrammingTableEnrty entry_iterator = winning_entry;
+		result_seam.insert_pixel(pixel_it, energy_mat[pixel_it.row_number][pixel_it.col_number]);
+		for(int i = cols - 2; i >= 0; i --)
+		{
+			pixel_it = entry_iterator.next_pixel;
+			entry_iterator = table[pixel_it.row_number][pixel_it.col_number];
+			result_seam.insert_pixel(pixel_it, energy_mat[pixel_it.row_number][pixel_it.col_number]);
+		}
+		
+		return result_seam;
 	}
 	
 	static void saveImage(String path, BufferedImage input_image)
