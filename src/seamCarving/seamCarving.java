@@ -1,8 +1,6 @@
 package seamCarving;
 
 import java.awt.Color;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
@@ -131,7 +129,7 @@ public class seamCarving {
 				{
 					//TODO: understand if we have to choose a weighted combination of the two energies are just add them.
 					//If so I think that entropy should be scaled to have as much influence as the regular energy values (are about 10 times more)
-					regular_enrgy_mat[i][j] = regular_enrgy_mat[i][j] + entropy_energy_mat[i][j];
+					energy_matrix[i][j] = regular_enrgy_mat[i][j] + entropy_energy_mat[i][j];
 				}
 			}
 		}
@@ -300,7 +298,7 @@ public class seamCarving {
 		BufferedImage output_img = new BufferedImage(w, h - 1, type);
 		int output_img_col_index = 0;
 		
-		for(int a = 0; a < w; a++)
+		for(int a = w -1; a >= 0; a--)
 		{	
 			output_img_col_index = 0;
 			Pixel p = local_seam_copy.pixels_list.remove(0);
@@ -349,7 +347,7 @@ public class seamCarving {
 	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
 
 	    		  //For debug
-	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i, "horizontal");
+	    		  //color_seam_on_image(lowest_energy_seam, red_seams_image, i, "horizontal");
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
@@ -379,7 +377,7 @@ public class seamCarving {
 	    		  Seam lowest_energy_seam= pick_next_seam(energy_mat);
 
 	    		  //For debug
-	    		  color_seam_on_image(lowest_energy_seam, red_seams_image, i, "vertical");
+	    		//  color_seam_on_image(lowest_energy_seam, red_seams_image, i, "vertical");
 
 	    		  //TODO: add an if for duplicate or remove seam. right now there is only removing
 	    		  output_image = remove_seam_from_image(lowest_energy_seam, output_image);
