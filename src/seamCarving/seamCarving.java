@@ -236,7 +236,6 @@ public class seamCarving {
 		DynamicProgrammingTableEnrty returned_up = null, returned_down = null, returned_left = null;
 		Pixel winning_pixel = null;
 
-		f_c = energy_mat[p.row_number][p.col_number];
 		int left_value = Integer.MAX_VALUE, up_value = Integer.MAX_VALUE, down_value = Integer.MAX_VALUE;
 		//Making sure the dynamic programming calculation for all three left neighbors was done.
 		if(null == working_table[p.row_number][p.col_number - 1])
@@ -279,6 +278,7 @@ public class seamCarving {
 		{
 			d = new DynamicProgrammingTableEnrty(p.row_number, p.col_number - 1, left_value);
 		}
+		working_table[p.row_number][p.col_number] = d;
 		return d;
 	}
 	
@@ -343,7 +343,7 @@ public class seamCarving {
 		// Initialize all matrix to -1
 		for(int i = 0; i < rows; i++)
 		{
-			for(int j = 0; j < cols; j++)
+			for(int j = 1; j < cols; j++)
 			{
 				table[i][j] = null;
 			}
@@ -395,7 +395,8 @@ public class seamCarving {
 		// Initialize all matrix to -1
 		for(int i = 0; i < rows; i++)
 		{
-			for(int j = 0; j < cols; j++)
+			table[i][0] = new DynamicProgrammingTableEnrty(i,  0, 0);
+			for(int j = 1; j < cols; j++)
 			{
 				table[i][j] = null;
 			}
@@ -420,7 +421,8 @@ public class seamCarving {
 		Pixel pixel_it = first_pixel_in_seam;
 		DynamicProgrammingTableEnrty entry_iterator = winning_entry;
 		result_seam.insert_pixel(pixel_it, table[pixel_it.row_number][pixel_it.col_number].total_energy);
-		for(int i = cols - 2; i > 0; i --)
+		int i;
+		for(i = cols - 2; i >= 0; i --)
 		{
 			pixel_it = entry_iterator.next_pixel;
 			entry_iterator = table[pixel_it.row_number][pixel_it.col_number];
