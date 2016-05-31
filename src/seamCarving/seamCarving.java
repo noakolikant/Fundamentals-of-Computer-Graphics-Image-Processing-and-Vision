@@ -77,7 +77,8 @@ public class seamCarving {
 				Pixel p = new Pixel(a, b);
 				energy_matrix[a][b] = new ForwardEnergyCost(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 				Color c1, c2;
-				int base = Integer.MAX_VALUE;
+//				int base = Integer.MAX_VALUE;
+				int base = 0;
 				if((0 != a) && (h - 1 != a))
 				{
 					c1 = new Color(img.getRGB(b, a + 1));
@@ -246,7 +247,7 @@ public class seamCarving {
 		}
 		left_value = (int) (working_table[p.row_number][p.col_number - 1].total_energy + f_c.C_L);
 
-		if(0 != p.row_number)
+		if(1 != p.row_number)
 		{
 			if(null == working_table[p.row_number - 1][p.col_number - 1])
 			{
@@ -256,7 +257,7 @@ public class seamCarving {
 			}
 			up_value = (int) (working_table[p.row_number - 1][p.col_number - 1].total_energy + f_c.C_U);
 		}
-		if((rows - 1 != p.row_number) && (null == working_table[p.row_number + 1][p.col_number - 1]))
+		if((rows - 2 != p.row_number) && (null == working_table[p.row_number + 1][p.col_number - 1]))
 		{
 			returned_down = pick_next_seam_dynamic_function(working_table, energy_mat,
 					new Pixel(p.row_number + 1, p.col_number - 1));
@@ -405,7 +406,7 @@ public class seamCarving {
 		DynamicProgrammingTableEnrty winning_entry = null, returned_entry = null;
 		Pixel first_pixel_in_seam = null;
 		//Calculate and pick table entry
-		for(int i = 0; i < rows; i++)
+		for(int i = 1; i < rows - 1; i++)
 		{
 			Pixel p = new Pixel(i, cols - 1); 
 			returned_entry = pick_next_seam_dynamic_function(table, energy_mat, p);
