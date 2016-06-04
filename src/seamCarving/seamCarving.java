@@ -484,21 +484,21 @@ public class seamCarving {
 		}
 		for (int i = 0; i < k; i++) {
 			// we remove only cols
-			ForwardEnergyCost [][] temp_energy_matrix = new ForwardEnergyCost [last_energy_matrix.length][last_energy_matrix[0].length - 1];
+			ForwardEnergyCost [][] temp_energy_matrix = new ForwardEnergyCost [last_energy_matrix.length - 1][last_energy_matrix[0].length];
 			lowest_energy_seam = pick_next_seam(last_energy_matrix);
 			temp_seam = new Seam(lowest_energy_seam);
 			
-			for(int a = 0; a < temp_energy_matrix.length; a++)
+			Iterator<Pixel> it = temp_seam.pixels_list.iterator();
+			for(int b = 0; b < temp_energy_matrix[0].length; b++)
 			{	
-				int output_img_col_index = 0;
-				Pixel p = temp_seam.pixels_list.remove(0);
-				for(int b = 0; b < temp_energy_matrix[0].length; b++)
+				int output_img_row_index = 0;
+				Pixel p = it.next();
+				for(int a = 0; a < temp_energy_matrix.length; a++)
 				{
-					//copy all col but seam's
-					if(p.row_number != b)
+					if(p.row_number != a)
 					{
-						temp_energy_matrix[a][output_img_col_index] = last_energy_matrix[a][b]; 
-						output_img_col_index++;
+						temp_energy_matrix[output_img_row_index][b] = last_energy_matrix[a][b]; 
+						output_img_row_index++;
 					}
 				}
 			}
