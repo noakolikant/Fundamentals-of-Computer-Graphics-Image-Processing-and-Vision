@@ -6,6 +6,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -333,7 +334,6 @@ public class seamCarving {
 		return current_new_entry;
 	}
 
-	//TODO: change function to be able to return the minimum k seams and not one only (for the enlarging part)
 	public static Seam pick_next_seam(double[][] energy_mat)
 	{
 		int rows = energy_mat.length;
@@ -385,6 +385,45 @@ public class seamCarving {
 
 		return result_seam;
 	}
+	
+	public static List<Seam> pick_next_k_seams(int k, double[][] energy_mat) {
+		List<Seam> k_seams = new ArrayList<Seam>();
+		Seam lowest_energy_seam = null, temp_seam = null;
+		// Copy energy mat
+		double [][] last_energy_matrix = new double[energy_mat.length][energy_mat[0].length];
+		for (int i = 0; i < energy_mat.length; i++) {
+			for (int j = 0; j < energy_mat[0].length; j++) {
+				last_energy_matrix[i][j] = energy_mat[i][j];
+			}
+		}
+		for (int i = 0; i < k; i++) {
+			// we remove only rows
+			double [][] temp_energy_matrix = new double [last_energy_matrix.length - 1][last_energy_matrix[0].length];
+			lowest_energy_seam = pick_next_seam(last_energy_matrix);
+			temp_seam = new Seam(lowest_energy_seam);
+
+			Iterator<Pixel> it = temp_seam.pixels_list.iterator();
+			for(int b = 0; b < temp_energy_matrix[0].length; b++)
+			{	
+				int output_img_row_index = 0;
+				Pixel p = it.next();
+					
+				for(int a = 0; a < temp_energy_matrix.length; a++)
+				{
+					if(p.row_number != a)
+					{
+						temp_energy_matrix[output_img_row_index][b] = last_energy_matrix[a][b]; 
+						output_img_row_index++;
+					}
+				}
+			}
+			last_energy_matrix = temp_energy_matrix;			
+			
+			k_seams.add(lowest_energy_seam);
+			
+		}
+		return k_seams;
+	}
 
 	public static Seam pick_next_seam(ForwardEnergyCost[][] energy_mat)
 	{
@@ -433,9 +472,43 @@ public class seamCarving {
 		return result_seam;
 	}
 	
-	
-	
-	
+	public static List<Seam> pick_next_k_seams(int k, ForwardEnergyCost[][] energy_mat) {
+		List<Seam> k_seams = new ArrayList<Seam>();
+		Seam lowest_energy_seam = null, temp_seam = null;
+		// Copy energy mat
+		ForwardEnergyCost [][] last_energy_matrix = new ForwardEnergyCost[energy_mat.length][energy_mat[0].length];
+		for (int i = 0; i < energy_mat.length; i++) {
+			for (int j = 0; j < energy_mat[0].length; j++) {
+				last_energy_matrix[i][j] = energy_mat[i][j];
+			}
+		}
+		for (int i = 0; i < k; i++) {
+			// we remove only cols
+			ForwardEnergyCost [][] temp_energy_matrix = new ForwardEnergyCost [last_energy_matrix.length][last_energy_matrix[0].length - 1];
+			lowest_energy_seam = pick_next_seam(last_energy_matrix);
+			temp_seam = new Seam(lowest_energy_seam);
+			
+			for(int a = 0; a < temp_energy_matrix.length; a++)
+			{	
+				int output_img_col_index = 0;
+				Pixel p = temp_seam.pixels_list.remove(0);
+				for(int b = 0; b < temp_energy_matrix[0].length; b++)
+				{
+					//copy all col but seam's
+					if(p.row_number != b)
+					{
+						temp_energy_matrix[a][output_img_col_index] = last_energy_matrix[a][b]; 
+						output_img_col_index++;
+					}
+				}
+			}
+			last_energy_matrix = temp_energy_matrix;			
+			
+			k_seams.add(lowest_energy_seam);
+			
+		}
+		return k_seams;
+	}	
 
 	static void saveImage(String path, BufferedImage input_image)
 	{
@@ -464,7 +537,7 @@ public class seamCarving {
 			input_image.setRGB(p.col_number, p.row_number, col);
 		}
 
-		String outputfile = "C:\\Users\\noa\\Desktop\\" + seam_direction + "_" + operation_number + ".jpg";
+		String outputfile = "C:\\Temp\\" + seam_direction + "_" + operation_number + ".jpg";
 		saveImage(outputfile, input_image);
 	}
 
@@ -513,7 +586,6 @@ public class seamCarving {
 		int energy_type_integer = Integer.parseInt(args[3]);
 		EnergyTypes energy_type = EnergyTypes.values()[energy_type_integer];
 		String output_image_file = args[4];
-		// note for Noa's debugging used origin picture has width = 962, height = 445
 
 		try
 		{
@@ -541,32 +613,32 @@ public class seamCarving {
 			//Removing delta_rows rows from image
 			if(delta_rows > 0)
 			{
+				List<Seam> k_seams = null;
+				if(EnergyTypes.FORWARD_ENERGY != energy_type)
+				{
+					k_seams = pick_next_k_seams(delta_rows, energy_mat);
+				}
+				else {
+					k_seams = pick_next_k_seams(delta_rows, forward_energy_mat);
+				}
 				for(int i = 0; i < delta_rows; i ++)
 				{
-					Seam lowest_energy_seam;
-					if(EnergyTypes.FORWARD_ENERGY != energy_type)
-					{
-						lowest_energy_seam= pick_next_seam(energy_mat);
-					}
-					else
-					{
-						lowest_energy_seam= pick_next_seam(forward_energy_mat);	
-					}
+					Seam lowest_energy_seam = k_seams.get(i);
+					
 					//For debug
 					color_seam_on_image(lowest_energy_seam, red_seams_image, i, "horizontal");
 
 					//TODO: add an if for duplicate or remove seam. right now there is only removing
 					output_image = remove_seam_from_image(lowest_energy_seam, output_image);
-
-					if(EnergyTypes.FORWARD_ENERGY != energy_type)
-					{
-						energy_mat = compute_energy_mat_from_image(output_image, energy_type);
-					}
-					else
-					{
-						forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
-					}	 
 				}
+				if(EnergyTypes.FORWARD_ENERGY != energy_type)
+				{
+					energy_mat = compute_energy_mat_from_image(output_image, energy_type);
+				}
+				else
+				{
+					forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
+				}	
 			}
 
 			if(delta_cols > 0)
@@ -582,7 +654,6 @@ public class seamCarving {
 				output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);	    	  
 				red_seams_image = deepCopy(output_image);
 
-				//TODO: instead of recalculating it rotate it
 				if(EnergyTypes.FORWARD_ENERGY != energy_type)
 				{
 					energy_mat = compute_energy_mat_from_image(output_image, energy_type);
@@ -591,32 +662,34 @@ public class seamCarving {
 				{
 					forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
 				}	    	  
-				//TODO: transpose image
+
+				List<Seam> k_seams = null;
+				
+				if(EnergyTypes.FORWARD_ENERGY != energy_type)
+				{
+					k_seams = pick_next_k_seams(delta_cols, energy_mat);
+				}
+				else {
+					k_seams = pick_next_k_seams(delta_cols, forward_energy_mat);
+				}
+				
 				for(int i = 0; i < delta_cols; i ++)
 				{
-					Seam lowest_energy_seam;
-					if(EnergyTypes.FORWARD_ENERGY != energy_type)
-					{
-						lowest_energy_seam = pick_next_seam(energy_mat);
-					}
-					else
-					{
-						lowest_energy_seam= pick_next_seam(forward_energy_mat);	
-					}
-
+					Seam lowest_energy_seam = k_seams.get(i);
+					
 					//For debug
 					color_seam_on_image(lowest_energy_seam, red_seams_image, i, "vertical");
 
 					//TODO: add an if for duplicate or remove seam. right now there is only removing
-					output_image = remove_seam_from_image(lowest_energy_seam, output_image);
-					if(EnergyTypes.FORWARD_ENERGY != energy_type)
-					{
-						energy_mat = compute_energy_mat_from_image(output_image, energy_type);
-					}
-					else
-					{
-						forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
-					}	    	
+					output_image = remove_seam_from_image(lowest_energy_seam, output_image);	    	
+				}
+				if(EnergyTypes.FORWARD_ENERGY != energy_type)
+				{
+					energy_mat = compute_energy_mat_from_image(output_image, energy_type);
+				}
+				else
+				{
+					forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
 				}
 
 				//transpose again
