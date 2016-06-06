@@ -521,26 +521,6 @@ public class seamCarving {
 		}
 	}
 
-	//debug_func
-	static void color_seam_on_image(Seam s, BufferedImage input_image, int operation_number, String seam_direction) throws IOException
-	{
-		int r = 255;
-		int g = 0;
-		int b = 0;
-		int col = (r << 16) | (g << 8) | b;
-
-		Iterator<Pixel> it = s.pixels_list.iterator();
-
-		for(int i = 0; i < s.max_length; i++)
-		{
-			Pixel p = it.next();
-			input_image.setRGB(p.col_number, p.row_number, col);
-		}
-
-		String outputfile = "C:\\Temp\\" + seam_direction + "_" + operation_number + ".jpg";
-		saveImage(outputfile, input_image);
-	}
-
 	public static BufferedImage deepCopy(BufferedImage bi)
 	{
 		ColorModel cm = bi.getColorModel();
@@ -577,6 +557,36 @@ public class seamCarving {
 		}
 		return output_img;
 	}
+	
+	public static BufferedImage add_seam_to_image(Seam s, BufferedImage img)
+	{
+		Seam local_seam_copy = new Seam(s);
+
+		int type = img.getType();
+		int w = img.getWidth();
+		int h = img.getHeight();
+
+		//The image is +1 less in height
+		BufferedImage output_img = new BufferedImage(w, h + 1, type);
+		int output_img_col_index = 0;
+
+		for(int a = w -1; a >= 0; a--)
+		{	
+			output_img_col_index = 0;
+			Pixel p = local_seam_copy.pixels_list.remove(0);
+			for(int b = 0; b < h; b++)
+			{
+				output_img.setRGB(a, output_img_col_index, img.getRGB(a, b));
+				output_img_col_index++;
+				// duplicate the seam using the avg. value of its neighboors
+				if(p.row_number == b) {
+					output_img.setRGB(a, output_img_col_index, img.getRGB(a, b));
+					output_img_col_index++;
+				}
+			}
+		}
+		return output_img;
+	}
 
 	public static void main(String[] args) {
 
@@ -591,7 +601,6 @@ public class seamCarving {
 		{
 			BufferedImage input_image = ImageIO.read(new File(image_file));
 			BufferedImage output_image = deepCopy(input_image);
-			BufferedImage red_seams_image = deepCopy(input_image);
 
 			int delta_cols = input_image.getWidth() - cols_num_after;
 			int delta_rows = input_image.getHeight() - rows_num_after;
@@ -610,26 +619,44 @@ public class seamCarving {
 			}
 			//TODO: Decide to if the next operation is for row or col. If a col generate a transposed energy matrix.
 
-			//Removing delta_rows rows from image
-			if(delta_rows > 0)
+			//Removing or Adding delta_rows rows from image
+			if(Math.abs(delta_rows) > 0)
 			{
 				List<Seam> k_seams = null;
 				if(EnergyTypes.FORWARD_ENERGY != energy_type)
 				{
-					k_seams = pick_next_k_seams(delta_rows, energy_mat);
+					k_seams = pick_next_k_seams(Math.abs(delta_rows), energy_mat);
 				}
 				else {
-					k_seams = pick_next_k_seams(delta_rows, forward_energy_mat);
+					k_seams = pick_next_k_seams(Math.abs(delta_rows), forward_energy_mat);
 				}
-				for(int i = 0; i < delta_rows; i ++)
-				{
-					Seam lowest_energy_seam = k_seams.get(i);
-					
-					//For debug
-					color_seam_on_image(lowest_energy_seam, red_seams_image, i, "horizontal");
-
-					//TODO: add an if for duplicate or remove seam. right now there is only removing
-					output_image = remove_seam_from_image(lowest_energy_seam, output_image);
+				if (delta_rows > 0) {
+					// remove seams
+					for(int i = 0; i < delta_rows; i ++)
+					{
+						Seam lowest_energy_seam = k_seams.get(i);
+						
+						output_image = remove_seam_from_image(lowest_energy_seam, output_image);
+					}
+				}
+				else {
+					// fix the seams to the oringal image coordinates
+					for (int i = 0; i < Math.abs(delta_rows); i++) {
+						Seam ith_seam = k_seams.get(i);
+						for (int j = i+1; j< Math.abs(delta_rows); j++) {
+							// the j-th seam was selected after the lowest energy
+							// seam was deleted from the original image
+							k_seams.get(j).add_one_to_row(ith_seam);
+						}
+					}
+					for (int i = 0; i < Math.abs(delta_rows); i++) {
+						Seam lowest_energy_seam = k_seams.get(i);
+						output_image = add_seam_to_image(lowest_energy_seam, output_image);
+						// fix coordinates of all the seams according to the new row
+						for (int j = i + 1; j < Math.abs(delta_rows); j++) {
+							k_seams.get(j).add_one_to_row(lowest_energy_seam);
+						}
+					}
 				}
 				if(EnergyTypes.FORWARD_ENERGY != energy_type)
 				{
@@ -641,7 +668,7 @@ public class seamCarving {
 				}	
 			}
 
-			if(delta_cols > 0)
+			if(Math.abs(delta_cols) > 0)
 			{
 				int w_before_transpose = output_image.getWidth();
 				int h_before_transpose = output_image.getHeight(); 
@@ -652,7 +679,6 @@ public class seamCarving {
 				output_image = new BufferedImage(h_before_transpose, w_before_transpose,
 						output_image.getType());
 				output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);	    	  
-				red_seams_image = deepCopy(output_image);
 
 				if(EnergyTypes.FORWARD_ENERGY != energy_type)
 				{
@@ -667,31 +693,42 @@ public class seamCarving {
 				
 				if(EnergyTypes.FORWARD_ENERGY != energy_type)
 				{
-					k_seams = pick_next_k_seams(delta_cols, energy_mat);
+					k_seams = pick_next_k_seams(Math.abs(delta_cols), energy_mat);
 				}
 				else {
-					k_seams = pick_next_k_seams(delta_cols, forward_energy_mat);
+					k_seams = pick_next_k_seams(Math.abs(delta_cols), forward_energy_mat);
 				}
 				
-				for(int i = 0; i < delta_cols; i ++)
-				{
-					Seam lowest_energy_seam = k_seams.get(i);
-					
-					//For debug
-					color_seam_on_image(lowest_energy_seam, red_seams_image, i, "vertical");
-
-					//TODO: add an if for duplicate or remove seam. right now there is only removing
-					output_image = remove_seam_from_image(lowest_energy_seam, output_image);	    	
+				if (delta_cols > 0) {
+					// remove seams
+					for(int i = 0; i < delta_cols; i ++)
+					{
+						Seam lowest_energy_seam = k_seams.get(i);
+						
+						output_image = remove_seam_from_image(lowest_energy_seam, output_image);
+					}
 				}
-				if(EnergyTypes.FORWARD_ENERGY != energy_type)
-				{
-					energy_mat = compute_energy_mat_from_image(output_image, energy_type);
+				
+				else {
+					// fix the seams to the original image coordinates
+					for (int i = 0; i < Math.abs(delta_cols); i++) {
+						Seam ith_seam = k_seams.get(i);
+						for (int j = i+1; j< Math.abs(delta_cols); j++) {
+							// the j-th seam was selected after the lowest energy
+							// seam was deleted from the original image
+							k_seams.get(j).add_one_to_row(ith_seam);
+						}
+					}
+					for (int i = 0; i < Math.abs(delta_cols); i++) {
+						Seam lowest_energy_seam = k_seams.get(i);
+						output_image = add_seam_to_image(lowest_energy_seam, output_image);
+						// fix coordinates of all the seams according to the new row
+						for (int j = i + 1; j < Math.abs(delta_cols); j++) {
+							k_seams.get(j).add_one_to_row(lowest_energy_seam);
+						}
+					}
 				}
-				else
-				{
-					forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
-				}
-
+				
 				//transpose again
 				h_before_transpose = output_image.getHeight();
 				w_before_transpose = output_image.getWidth();
@@ -700,8 +737,16 @@ public class seamCarving {
 				rgb_arr = trasposeArr(rgb_arr, w_before_transpose, h_before_transpose);
 				output_image = new BufferedImage(h_before_transpose, w_before_transpose,
 						output_image.getType());
-				output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);	    	  
-				red_seams_image = deepCopy(output_image);
+				output_image.setRGB(0, 0, h_before_transpose, w_before_transpose, rgb_arr, 0, h_before_transpose);
+				
+				if(EnergyTypes.FORWARD_ENERGY != energy_type)
+				{
+					energy_mat = compute_energy_mat_from_image(output_image, energy_type);
+				}
+				else
+				{
+					forward_energy_mat = compute_forward_energy_mat_from_image(output_image);
+				}	
 			}
 
 			output_image = output_image.getSubimage(0, 0, cols_num_after, rows_num_after);
