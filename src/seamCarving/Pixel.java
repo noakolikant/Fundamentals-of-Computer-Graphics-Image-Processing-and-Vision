@@ -20,7 +20,7 @@ public class Pixel {
 		this.col_number = p.col_number;
 	}
 	
-	private static void remove_unreal_pixels(List<Pixel> pixels_list, int w, int h)
+	private static List<Pixel> remove_unreal_pixels(List<Pixel> pixels_list, int w, int h)
 	{
 		Iterator<Pixel> it = pixels_list.iterator();
 		
@@ -43,6 +43,7 @@ public class Pixel {
 			Pixel p = it.next();
 			pixels_list.remove(p);
 		}		
+		return pixels_list;
 	}
 	
 	public List<Pixel> get_neighbors(int w, int h)
@@ -66,7 +67,7 @@ public class Pixel {
 		neighbors_list.add(p7);
 		neighbors_list.add(p8);
 		
-		remove_unreal_pixels(neighbors_list, w, h);
+		neighbors_list = remove_unreal_pixels(neighbors_list, w, h);
 		return neighbors_list;
 	}
 	
@@ -106,7 +107,7 @@ public class Pixel {
 				neighbors_list.add(p);
 			}
 		}
-		remove_unreal_pixels(neighbors_list, w, h);
+		neighbors_list = remove_unreal_pixels(neighbors_list, w, h);
 		return neighbors_list;
 	}
 }
