@@ -147,10 +147,6 @@ public class seamCarving {
 				{
 					Pixel p_grey = it.next();
 					Color color_neighbor = new Color(img.getRGB(p_grey.col_number, p_grey.row_number));
-					if(get_gray_color_from_rgb(color_neighbor) < 0)
-					{
-						System.out.println("gray color is less than 0 \n");
-					}
 					sum_grey += get_gray_color_from_rgb(color_neighbor);
 				}
 
@@ -161,7 +157,15 @@ public class seamCarving {
 					Color color_neighbor = new Color(img.getRGB(neighbor.col_number, neighbor.row_number));
 
 					double P_mn = (double)get_gray_color_from_rgb(color_neighbor) / sum_grey;
-					H -= P_mn * Math.log(P_mn);
+					if(P_mn > 1)
+					{
+						System.out.println("P_mn greater than 1");
+					}
+					if(P_mn < 0)
+					{
+						System.out.println("P_mn less than 0");
+					}
+					H -= (P_mn * Math.log(P_mn));
 				}
 				energy_matrix[a][b] = H;
 			}
@@ -191,9 +195,7 @@ public class seamCarving {
 				{
 					for(int j = 0; j < w; j++)
 					{
-						//TODO: understand if we have to choose a weighted combination of the two energies are just add them.
-						//If so I think that entropy should be scaled to have as much influence as the regular energy values (are about 10 times more)
-						energy_matrix[i][j] = regular_enrgy_mat[i][j] + entropy_energy_mat[i][j];
+						energy_matrix[i][j] = regular_enrgy_mat[i][j] + 3 * entropy_energy_mat[i][j];
 					}
 				}
 			}
